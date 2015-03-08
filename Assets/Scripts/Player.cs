@@ -55,10 +55,50 @@ public class Player : MovingObject {
         horisontal = (int)Input.GetAxisRaw("Horizontal");
         vertical = (int)Input.GetAxisRaw("Vertical");
 
-        // prevent diagonal movement
-        if (horisontal != 0)
-            vertical = 0;
+        // prevent diagonal movement from axis
+        //if (horisontal != 0)
+        //    vertical = 0;
 
+        // Take regular movement also from keypad
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            vertical = -1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad4))
+        {
+             horisontal = -1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad6))
+        {
+            horisontal = 1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad8))
+        {
+            vertical = 1;
+        }
+        
+        // take diagonal movement from corner keys
+
+        if (Input.GetKeyDown(KeyCode.Keypad1) || Input.GetKeyDown(KeyCode.End))
+        {
+            horisontal = -1;
+            vertical = -1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad3) || Input.GetKeyDown(KeyCode.PageDown))
+        {
+            horisontal = 1;
+            vertical = -1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad7) || Input.GetKeyDown(KeyCode.Home))
+        {
+            horisontal = -1;
+            vertical = 1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad9) || Input.GetKeyDown(KeyCode.PageUp))
+        {
+            horisontal = 1;
+            vertical = 1;
+        }
         if (horisontal != 0 || vertical != 0)
         {
             AttemptMove<Walls>(horisontal, vertical);
