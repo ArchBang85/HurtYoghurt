@@ -7,6 +7,8 @@ using Random = UnityEngine.Random; // Need to specify because there's an overlap
 
 public class BoardManager : MonoBehaviour {
         
+    public GameObject testWall;
+
     [Serializable]
     public class Count
     {
@@ -166,10 +168,9 @@ public class BoardManager : MonoBehaviour {
         // Now see if we can find the outer walls of the monastery within the pisces 
         //
 
-        for (int c = columns + 1; c < columns + 80; c++)
+        for (int c = 1; c < (columns * rows); c++)
         {
-            
-            
+            TileData aboveTile, belowTile, leftTile, rightTile = null;
             if(tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
             {
                 Debug.Log("this is " + tileMaster[c].x + " " + tileMaster[c].y + " reporting in");
@@ -177,9 +178,10 @@ public class BoardManager : MonoBehaviour {
                 // rules:
                 // if all four sides are in monastery, then definitely not an outer wall
 
-                // using lambda...
-                TileData aboveTile, belowTile, leftTile, rightTile = null;
 
+                // GROUP 
+                // using lambda for the first time ever...
+                
                 List<TileData> sameColumn = tileMaster.FindAll(TileData => TileData.x == tileMaster[c].x);
 
                 try
@@ -196,16 +198,17 @@ public class BoardManager : MonoBehaviour {
                 List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == tileMaster[c].y);
                  try
                 {
-                    leftTile = sameColumn.Find(TileData => TileData.x == (tileMaster[c].x + 1));
+                    leftTile = sameRow.Find(TileData => TileData.x == (tileMaster[c].x - 1));
                 }
                  catch { leftTile = null; }
 
                 try
                 {
-                    rightTile = sameColumn.Find(TileData => TileData.x == (tileMaster[c].x - 1));
+                    rightTile = sameRow.Find(TileData => TileData.x == (tileMaster[c].x + 1));
                 }
                 catch { rightTile = null; }
 
+                /*
                 try
                 {
                     Debug.Log("above me x: " + aboveTile.x);
@@ -218,7 +221,7 @@ public class BoardManager : MonoBehaviour {
                     Debug.Log("below me y: " + belowTile.y);
                 }
                 catch { }
-                 try
+                try
                 {
                     Debug.Log("left of me x: " + leftTile.x);
                     Debug.Log("left of me y: " + leftTile.y);
@@ -229,21 +232,25 @@ public class BoardManager : MonoBehaviour {
                     Debug.Log("right of me y: " + rightTile.y);
                 }
                 catch { }
-    
+                */
+
+                // All 
+                if ((aboveTile.isMonastery() && rightTile.isMonastery() && aboveTile.isMonastery() && belowTile.isMonastery()))
+                {
+                    // Definitely not a monastery outer wall
+              
+                }
+                else
+                {
+                    GameObject instance =  Instantiate(testWall, new Vector3(tileMaster[c].x, tileMaster[c].y, 0), Quaternion.identity) as GameObject;
+                    instance.transform.SetParent(boardHolder);
+                }
+
             }
 
             tileMaster[c].setChecked(true);
 
         }
-
-
-      /*  for (int x = -1; x < columns + 1; x++)
-        {
-            for (int y = -1; y < rows + 1; y++)
-            {
-
-            }
-        }*/
 
 
     }
@@ -274,8 +281,7 @@ public class BoardManager : MonoBehaviour {
     public void SetupScene(int level)
     {
         pisces = GameObject.FindGameObjectsWithTag("Pisces");
-        Debug.Log(pisces);
-
+       
         BoardSetup();
         InitialiseList();
 
