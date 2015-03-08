@@ -22,6 +22,9 @@ public class BoardManager : MonoBehaviour {
 
     public int columns = 8; 
     public int rows = 8;
+
+    public bool basicShape = true;
+    
     public Count wallCount = new Count(5, 9); // minimum and maximum of walls
     public Count foodCount = new Count(1, 3);
     public GameObject exit;
@@ -40,37 +43,74 @@ public class BoardManager : MonoBehaviour {
         // Clear list
         gridPositions.Clear ();
 
-        // Loop through cols
-        for (int x = 1; x < columns - 1; x++)
-        {
-            // Loop through rows
-            for (int y = 1; y < rows - 1; y++)
-            {
-                // At each index add a new Vector3 
-                gridPositions.Add(new Vector3(x, y, 0f));
-            }
+        // Create basic outline of monastery
 
-        }
+       
+            // Loop through cols
+            for (int x = 1; x < columns - 1; x++)
+            {
+                // Loop through rows
+                for (int y = 1; y < rows - 1; y++)
+                {
+                    // At each index add a new Vector3 
+                    gridPositions.Add(new Vector3(x, y, 0f));
+                }
+            }
+       
+    
+
+        
+
+
+
 
     }
 
     void BoardSetup ()
     {
         boardHolder = new GameObject("Board").transform;
-
-        for (int x = -1; x < columns + 1; x++)
+        if (basicShape)
         {
-            for (int y = -1; y < rows + 1; y++)
+            for (int x = -1; x < columns + 1; x++)
             {
-                GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
-                if (x == -1 || x == columns || y == -1 || y == rows)
+                for (int y = -1; y < rows + 1; y++)
                 {
-                    toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
-                
-                }
-                GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+                    GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                    if (x == -1 || x == columns || y == -1 || y == rows)
+                    {
+                        toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
 
-                instance.transform.SetParent(boardHolder);
+                    }
+                    GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+
+                    instance.transform.SetParent(boardHolder);
+                }
+            }
+
+        }
+        else
+        {
+            for (int x = -1; x < columns + 1; x++)
+            {
+                for (int y = -1; y < rows + 1; y++)
+                {
+
+
+                    if ((x > 10 && y > 1) || (x > 3 && y > 2)) 
+                    { 
+
+                        GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                        
+                        if (x == -1 || x == columns || y == -1 || y == rows)
+                        {
+                            toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
+
+                        }
+                        GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+
+                        instance.transform.SetParent(boardHolder);
+                    }
+                }
             }
         }
 

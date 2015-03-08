@@ -49,12 +49,10 @@ public class GameManager : MonoBehaviour {
 
         // retain manager on scene load
         DontDestroyOnLoad(gameObject);
-
         enemies = new List<Enemy>();
 
         // Get a component ref to the attached script
 	    boardScript = GetComponent<BoardManager>();
-
 	    InitGame();
     }
 	
@@ -89,8 +87,6 @@ public class GameManager : MonoBehaviour {
         rankOptions[1] = GameObject.Find("RankOption2");
         rankOptions[2] = GameObject.Find("RankOption3");
         readyButton = GameObject.Find("ReadyText");
-
-
      
         // Clear out from last level
         enemies.Clear();
@@ -130,53 +126,7 @@ public class GameManager : MonoBehaviour {
         // Setup the game
         if(charSetup)
         {
-          
-            GameObject optionChosen;
-            int xDir = 0;
-            int yDir = 0;
-            if (Input.GetKeyDown(KeyCode.Keypad2))
-            {
-                yDir = 1;
-            }
-            if (Input.GetKeyDown(KeyCode.Keypad8))
-            {
-                yDir = -1;
-            }
-
-            optionIndex += yDir;
-            if (optionIndex >= 4)
-                optionIndex = 0;
-            if (optionIndex < 0)
-                optionIndex = 2;
-
-            if (Input.GetKeyDown(KeyCode.Keypad6))
-            {
-                xDir = 1;
-            }
-            if (Input.GetKeyDown(KeyCode.Keypad4))
-            {
-                xDir = -1;
-            }
-
-            optionType += xDir;
-            if (optionType >= 3)
-                optionType = 0;
-            if (optionType < 0)
-                optionType = 2;
-
-            if(yDir != 0 || xDir != 0)
-            {
-                moveToggle(optionType, optionIndex);
-            }
-
-            // Action selection
-            if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
-            {
-                charOptionSelect(optionType, optionIndex);
-
-                // Store player's selection in array
-                characterCharacteristics[optionType] = optionIndex;
-            }
+            charSetupUI();
         }
 
         if (playerTurn || enemiesMoving || doingSetup || charSetup)
@@ -184,6 +134,56 @@ public class GameManager : MonoBehaviour {
         StartCoroutine(MoveEnemies());
 
 	}
+
+    void charSetupUI()
+    {
+        GameObject optionChosen;
+        int xDir = 0;
+        int yDir = 0;
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            yDir = 1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad8))
+        {
+            yDir = -1;
+        }
+
+        optionIndex += yDir;
+        if (optionIndex >= 4)
+            optionIndex = 0;
+        if (optionIndex < 0)
+            optionIndex = 2;
+
+        if (Input.GetKeyDown(KeyCode.Keypad6))
+        {
+            xDir = 1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad4))
+        {
+            xDir = -1;
+        }
+
+        optionType += xDir;
+        if (optionType >= 3)
+            optionType = 0;
+        if (optionType < 0)
+            optionType = 2;
+
+        if (yDir != 0 || xDir != 0)
+        {
+            moveToggle(optionType, optionIndex);
+        }
+
+        // Action selection
+        if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+        {
+            charOptionSelect(optionType, optionIndex);
+
+            // Store player's selection in array
+            characterCharacteristics[optionType] = optionIndex;
+        }
+    }
 
     void moveToggle(int optionType, int optionIndex)
     {
@@ -260,9 +260,16 @@ public class GameManager : MonoBehaviour {
         {
             charSetup = false;
 
+            optionChosen = readyButton;
+            // Colour chosen text
+            optionChosen.GetComponent<Text>().color = new Color(0.235f, 0.5f, 0.235f, 1);
+            // Italicise
+            optionChosen.GetComponent<Text>().fontStyle = FontStyle.Italic;
+
             // Wait start time before showing level 
             Invoke("ShowLevelImage", levelStartDelay);
         }
+
         // Colour chosen text
         optionChosen.GetComponent<Text>().color = new Color(0.235f, 0.5f, 0.235f, 1); 
         // Italicise
@@ -290,10 +297,7 @@ public class GameManager : MonoBehaviour {
             optionChosen.GetComponent<Text>().fontStyle = FontStyle.Normal;
         }
 
-
-
     }
-
 
     public void AddEnemyToList(Enemy script)
     {
