@@ -7,18 +7,18 @@ public class VesicaPisces : MonoBehaviour {
     public GameObject pisces;
 
     public int stages = 4;
-
     public int copies = 1;
+    private Transform piscesParts;
 
     // Use this for initialization
 	void Awake () {
-
+        piscesParts = new GameObject("piscesHolder").transform;
         for (int y = 0; y < copies; y++)
         {
             for (int i = 0; i < stages; i++)
             {
-                Instantiate(pisces, new Vector3(transform.position.x + i * pisces.transform.localScale.x / 2, transform.position.y +  y * 10, 0), Quaternion.identity);
-
+                GameObject instance = Instantiate(pisces, new Vector3(transform.position.x + i * pisces.transform.localScale.x / 2, transform.position.y + y * 10, transform.position.z), Quaternion.identity) as GameObject;
+                instance.transform.SetParent(piscesParts);
             }
             // choose one intersection
             // For each 5th element, add a new side bulb
@@ -30,8 +30,6 @@ public class VesicaPisces : MonoBehaviour {
                 s -= 4;
             }
 
-            Debug.Log(bulbs);
-
             for (int b = 0; b < bulbs; b++)
             {
 
@@ -41,12 +39,10 @@ public class VesicaPisces : MonoBehaviour {
                 {
                     vertical = -1;
                 }
-                Instantiate(pisces, new Vector3(transform.position.x + pisces.transform.localScale.x / 2 + horisontal * pisces.transform.localScale.x / 2, transform.position.y + vertical * pisces.transform.localScale.y / 2 + y * 10, 0), Quaternion.identity);
+                GameObject instance = Instantiate(pisces, new Vector3(transform.position.x + pisces.transform.localScale.x / 2 + horisontal * pisces.transform.localScale.x / 2, transform.position.y + vertical * pisces.transform.localScale.y / 2 + y * 10, transform.position.z), Quaternion.identity) as GameObject;
+                instance.transform.SetParent(piscesParts);
             }
         }
-
-
-
 
 	}
 	

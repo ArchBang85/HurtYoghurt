@@ -36,6 +36,9 @@ public class BoardManager : MonoBehaviour {
     
     private Transform boardHolder;
     private List <Vector3> gridPositions = new List<Vector3> ();
+    
+
+    public GameObject[] pisces;
 
     void InitialiseList()
     {
@@ -56,13 +59,6 @@ public class BoardManager : MonoBehaviour {
                     gridPositions.Add(new Vector3(x, y, 0f));
                 }
             }
-       
-    
-
-        
-
-
-
 
     }
 
@@ -84,6 +80,26 @@ public class BoardManager : MonoBehaviour {
                     GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
 
                     instance.transform.SetParent(boardHolder);
+
+                    // See if new tile is within pisces limits
+                    foreach (GameObject piscesSphere in pisces)
+                    {
+                        //Debug.Log("Checking if in bounds");
+                        RaycastHit hit;
+                        if (Physics.Raycast(instance.transform.position, -Vector3.forward, out hit))
+                        {
+                            // What to do if in bounds
+                            Component[] s = instance.transform.GetComponents<MyTileObject>();
+                            foreach (Component com in s)
+                            {
+                                // Set boolean to true in each object... 
+                                // Or is it better to have a master array?
+                                com.GetComponent<MyTileObject>().inMonastery = true;
+
+                            }
+
+                        }
+                    }
                 }
             }
 
@@ -106,8 +122,7 @@ public class BoardManager : MonoBehaviour {
                             toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
 
                         }
-                        GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
-
+                        GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;                    
                         instance.transform.SetParent(boardHolder);
                     }
                 }
@@ -141,6 +156,9 @@ public class BoardManager : MonoBehaviour {
 
     public void SetupScene(int level)
     {
+        pisces = GameObject.FindGameObjectsWithTag("Pisces");
+        Debug.Log(pisces);
+
         BoardSetup();
         InitialiseList();
 
