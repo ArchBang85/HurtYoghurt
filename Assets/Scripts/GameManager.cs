@@ -27,11 +27,14 @@ public class GameManager : MonoBehaviour {
     private int Condition = 1;
     private int Rank = 1;
 
+    public GameObject readyButton;
     public GameObject[] ageOptions = new GameObject[3];
     public GameObject[] conditionOptions = new GameObject[3];
     public GameObject[] rankOptions = new GameObject[3];
     private int optionIndex = 0;
     private int optionType = 0;
+    // Storing the player's selections
+    private int[] characterCharacteristics = new int[3];
 
     public GameObject charSelectToggle;
 
@@ -68,6 +71,10 @@ public class GameManager : MonoBehaviour {
         doingSetup = true;
         charSetup = true;
 
+        levelImage = GameObject.Find("LevelImage");
+        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        HideLevelImage();
+
         // Character select screen
         CharSelectionImage = GameObject.Find("CharSelectionImage");
         CharSelectionImage.SetActive(true);
@@ -80,20 +87,29 @@ public class GameManager : MonoBehaviour {
         conditionOptions[2] = GameObject.Find("ConditionOption3");
         rankOptions[0] = GameObject.Find("RankOption1");
         rankOptions[1] = GameObject.Find("RankOption2");
-        rankOptions[2] = GameObject.Find("RankOption3");  
+        rankOptions[2] = GameObject.Find("RankOption3");
+        readyButton = GameObject.Find("ReadyText");
 
-        /*
-        levelImage = GameObject.Find("LevelImage");
-        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+
+     
+        // Clear out from last level
+        enemies.Clear();
+        boardScript.SetupScene(level);
+    }
+
+    private void ShowLevelImage()
+    {
+
+        if(CharSelectionImage.active)
+        {
+            CharSelectionImage.SetActive(false);
+        }
+
         levelText.text = "Day " + level;
         levelImage.SetActive(true);
 
         // Wait start time before hiding image
         Invoke("HideLevelImage", levelStartDelay);
-        */
-        // Clear out from last level
-        enemies.Clear();
-        boardScript.SetupScene(level);
     }
 
     private void HideLevelImage()
@@ -128,7 +144,7 @@ public class GameManager : MonoBehaviour {
             }
 
             optionIndex += yDir;
-            if (optionIndex >= 3)
+            if (optionIndex >= 4)
                 optionIndex = 0;
             if (optionIndex < 0)
                 optionIndex = 2;
@@ -157,8 +173,10 @@ public class GameManager : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
             {
                 charOptionSelect(optionType, optionIndex);
-            }
 
+                // Store player's selection in array
+                characterCharacteristics[optionType] = optionIndex;
+            }
         }
 
         if (playerTurn || enemiesMoving || doingSetup || charSetup)
@@ -169,26 +187,43 @@ public class GameManager : MonoBehaviour {
 
     void moveToggle(int optionType, int optionIndex)
     {
-        GameObject optionChosen;
-        if(optionType == 0)
+        GameObject optionChosen = null;
+        Debug.Log(optionIndex);
+
+
+        if (optionIndex < 3)
         {
-            optionChosen = ageOptions[optionIndex];
-        } else if (optionType == 1)
-        {
-            optionChosen = conditionOptions[optionIndex];
-        } else
-        {
-            optionChosen = rankOptions[optionIndex];
+            if (optionType == 0)
+            {
+                optionChosen = ageOptions[optionIndex];
+            }
+            else if (optionType == 1)
+            {
+                optionChosen = conditionOptions[optionIndex];
+            }
+            else
+            {
+                optionChosen = rankOptions[optionIndex];
+            }
+            // Arbitrary numbers buffering this, beware!
+            charSelectToggle.transform.position = new Vector3(optionChosen.transform.position.x - 110, optionChosen.transform.position.y - 50, 0.0f);
+
         }
 
-        // Arbitrary numbers buffering this, beware!
-        charSelectToggle.transform.position = new Vector3(optionChosen.transform.position.x - 110, optionChosen.transform.position.y - 50 , 0.0f);
+
+        // Move to ready button
+        if (optionIndex == 3)
+        {
+            optionChosen = readyButton;
+            charSelectToggle.transform.position = new Vector3(optionChosen.transform.position.x - 110, optionChosen.transform.position.y, 0.0f);
+        }
+
 
     }
 
     void charOptionSelect(int optionType, int optionIndex)
     {
-        GameObject optionChosen;
+        GameObject optionChosen = null;
         int[] notChosen = new int[2];
         if(optionIndex == 0)
         {
@@ -204,27 +239,36 @@ public class GameManager : MonoBehaviour {
             notChosen[1] = 1;
         }
 
-        if (optionType == 0)
-        {
-            optionChosen = ageOptions[optionIndex];
-        }
-        else if (optionType == 1)
-        {
-            optionChosen = conditionOptions[optionIndex];
-        }
-        else
-        {
-            optionChosen = rankOptions[optionIndex];
+        if (optionIndex < 3)
+        { 
+            if (optionType == 0)
+            {
+                optionChosen = ageOptions[optionIndex];
+            }
+            else if (optionType == 1)
+            {
+                optionChosen = conditionOptions[optionIndex];
+            }
+            else if (optionType == 2)
+            {
+                optionChosen = rankOptions[optionIndex];
+            } 
         }
 
+        // Start game if ready is selected
+        if (optionIndex == 3)
+        {
+            charSetup = false;
+
+            // Wait start time before showing level 
+            Invoke("ShowLevelImage", levelStartDelay);
+        }
         // Colour chosen text
         optionChosen.GetComponent<Text>().color = new Color(0.235f, 0.5f, 0.235f, 1); 
         // Italicise
         optionChosen.GetComponent<Text>().fontStyle = FontStyle.Italic;
 
-
         // Revert others in the same category
-
         for (int i = 0; i < 2; i++)
         {
             if (optionType == 0)
@@ -246,7 +290,10 @@ public class GameManager : MonoBehaviour {
             optionChosen.GetComponent<Text>().fontStyle = FontStyle.Normal;
         }
 
+
+
     }
+
 
     public void AddEnemyToList(Enemy script)
     {
