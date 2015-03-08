@@ -5,13 +5,14 @@ public class VesicaPisces : MonoBehaviour {
 
     // Create four overlapping spheres and one outside vestibule
     public GameObject pisces;
+    public GameObject smallPisces;
 
     public int stages = 4;
     public int copies = 1;
     private Transform piscesParts;
 
     // Use this for initialization
-	void Awake () {
+	public void setupPisces () {
         piscesParts = new GameObject("piscesHolder").transform;
         for (int y = 0; y < copies; y++)
         {
@@ -42,6 +43,21 @@ public class VesicaPisces : MonoBehaviour {
                 GameObject instance = Instantiate(pisces, new Vector3(transform.position.x + pisces.transform.localScale.x / 2 + horisontal * pisces.transform.localScale.x / 2, transform.position.y + vertical * pisces.transform.localScale.y / 2 + y * 10, transform.position.z), Quaternion.identity) as GameObject;
                 instance.transform.SetParent(piscesParts);
             }
+
+            // optional one small piscesSphere
+            if(Random.Range(0, 1)<1)
+            {
+                int horisontal = Random.Range(0, stages / 2 + 1);
+                int vertical = Random.Range(0, 2);
+                if (vertical == 0)
+                {
+                    vertical = -1;
+                }
+                GameObject instance = Instantiate(smallPisces, new Vector3(transform.position.x + pisces.transform.localScale.x / 4 + horisontal * pisces.transform.localScale.x / 2, transform.position.y + vertical * pisces.transform.localScale.y / 2 + y * 10, transform.position.z), Quaternion.identity) as GameObject;
+                instance.transform.SetParent(piscesParts);
+            }
+
+
         }
 
 	}

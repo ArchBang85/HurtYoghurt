@@ -8,6 +8,7 @@ using Random = UnityEngine.Random; // Need to specify because there's an overlap
 public class BoardManager : MonoBehaviour {
         
     public GameObject testWall;
+    public LayerMask blockingLayer;
 
     [Serializable]
     public class Count
@@ -29,6 +30,9 @@ public class BoardManager : MonoBehaviour {
         public int x { get; set; }
         public int y { get; set; }
         bool beenChecked = false;
+        bool monasteryWall = false;
+        public BoxCollider2D boxCollider;
+        public GameObject monasteryWallObject = null;
         public TileData(int counter, int xInit, int yInit)
         {
             index = counter;
@@ -70,9 +74,19 @@ public class BoardManager : MonoBehaviour {
             return beenChecked;
         }
 
-    }
+        public void setMonasteryWall(bool t)
+        {
+            monasteryWall = t;
+        }
 
- 
+        public bool isMonasteryWall()
+        {
+            return monasteryWall;
+        }
+
+
+
+    }
 
     public int columns = 8; 
     public int rows = 8;
@@ -104,10 +118,10 @@ public class BoardManager : MonoBehaviour {
             // create legitimate play area
         
             // Loop through cols
-            for (int x = -1; x < columns + 1; x++)
+            for (int x = 0; x < columns + 1; x++)
             {
                 // Loop through rows
-                for (int y = -1; y < rows + 1; y++)
+                for (int y = 0; y < rows + 1; y++)
                 {
                     // At each index add a new Vector3 
                     
@@ -121,14 +135,14 @@ public class BoardManager : MonoBehaviour {
     void BoardSetup ()
     {
 
-
+        tileMaster.Clear();
         boardHolder = new GameObject("Board").transform;
         int counter = 0;
         // Generate entire field
     
-            for (int x = -1; x < columns+1; x++)
+            for (int x = 0; x < columns+1; x++)
             {
-                for (int y = -1; y < rows+1; y++)
+                for (int y = 0; y < rows+1; y++)
                 {
                     tileMaster.Add(new TileData(counter, x, y));
                  
@@ -145,18 +159,19 @@ public class BoardManager : MonoBehaviour {
                     instance.transform.SetParent(boardHolder);
 
                     // See if new tile is within pisces limits
+
                     foreach (GameObject piscesSphere in pisces)
                     {           
                         RaycastHit hit;
                         if (Physics.Raycast(instance.transform.position, -Vector3.forward, out hit))
                         {
                             // What to do if in bounds
-                            Component[] s = instance.transform.GetComponents<MyTileObject>();
-                            foreach (Component com in s)
-                            {
-                                com.GetComponent<MyTileObject>().inMonastery = true;
+                            //Component[] s = instance.transform.GetComponents<MyTileObject>();
+                            //foreach (Component com in s)
+                            //{
+                                //com.GetComponent<MyTileObject>().inMonastery = true;
                                 tileMaster[counter].setIsMonastery(true);
-                            }
+                            //}
                         }
                     }
                     counter += 1;
@@ -167,17 +182,16 @@ public class BoardManager : MonoBehaviour {
 
         // Now see if we can find the outer walls of the monastery within the pisces 
         //
-
         for (int c = 1; c < (columns * rows); c++)
         {
             TileData aboveTile, belowTile, leftTile, rightTile = null;
             if(tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
             {
-                Debug.Log("this is " + tileMaster[c].x + " " + tileMaster[c].y + " reporting in");
+                //Debug.Log("this is " + tileMaster[c].x + " " + tileMaster[c].y + " reporting in");
+                
                 // find tiles above, below, left and right
                 // rules:
                 // if all four sides are in monastery, then definitely not an outer wall
-
 
                 // GROUP 
                 // using lambda for the first time ever...
@@ -235,15 +249,20 @@ public class BoardManager : MonoBehaviour {
                 */
 
                 // All 
-                if ((aboveTile.isMonastery() && rightTile.isMonastery() && aboveTile.isMonastery() && belowTile.isMonastery()))
+                if ((aboveTile.isMonastery() && rightTile.isMonastery() && leftTile.isMonastery() && belowTile.isMonastery()))
                 {
-                    // Definitely not a monastery outer wall
+                    // Definitely not a monastery outer wall if all sides are surrounded by monastery
               
                 }
                 else
                 {
                     GameObject instance =  Instantiate(testWall, new Vector3(tileMaster[c].x, tileMaster[c].y, 0), Quaternion.identity) as GameObject;
                     instance.transform.SetParent(boardHolder);
+                    tileMaster[c].setMonasteryWall(true);
+                    
+                    tileMaster[c].monasteryWallObject = instance;
+                    tileMaster[c].boxCollider = instance.GetComponent<BoxCollider2D>();
+                    checkDirection(1, 0, 15, c);
                 }
 
             }
@@ -252,7 +271,32 @@ public class BoardManager : MonoBehaviour {
 
         }
 
+        // What about the interior walls?
+        // Should be able to use raycasting here to bounce off interior walls
 
+ 
+
+    }
+
+    bool checkDirection(int xDir, int yDir, int range, int tileIndex)
+    {
+        
+        Vector2 start = new Vector2(tileMaster[tileIndex].monasteryWallObject.transform.position.x, tileMaster[tileIndex].monasteryWallObject.transform.position.y);
+        Vector2 end = start + new Vector2(xDir, yDir) * range;
+
+        // Make sure we don't hit our own collider when casting ray
+        tileMaster[tileIndex].boxCollider.enabled = false;
+        Debug.DrawRay(start, new Vector2(xDir, yDir) * range, Color.green, 20, false);
+        RaycastHit2D hit = Physics2D.Linecast(start, end, blockingLayer);
+        tileMaster[tileIndex].boxCollider.enabled = true;
+
+        if (hit.transform == null)
+        {
+            //
+            //
+            return true;
+        }
+        return false;
     }
 
     Vector3 RandomPosition()
@@ -281,7 +325,7 @@ public class BoardManager : MonoBehaviour {
     public void SetupScene(int level)
     {
         pisces = GameObject.FindGameObjectsWithTag("Pisces");
-       
+
         BoardSetup();
         InitialiseList();
 

@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour {
     public float turnDelay = .1f;
     public static GameManager instance = null;
     public BoardManager boardScript;
+    public VesicaPisces piscesScript;
     private int level = 1;
     public int playerFoodPoints = 100;
     [HideInInspector]public bool playerTurn = true;
@@ -54,6 +55,7 @@ public class GameManager : MonoBehaviour {
 
         // Get a component ref to the attached script
 	    boardScript = GetComponent<BoardManager>();
+        piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
 	    InitGame();
     }
 	
@@ -93,6 +95,7 @@ public class GameManager : MonoBehaviour {
         }
         // Clear out from last level
         enemies.Clear();
+        piscesScript.setupPisces();
         boardScript.SetupScene(level);
     }
 
