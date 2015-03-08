@@ -20,8 +20,61 @@ public class BoardManager : MonoBehaviour {
             }
     }
 
+    public class TileData
+    {
+        
+        int index {get; set;}
+        public int x { get; set; }
+        public int y { get; set; }
+        bool beenChecked = false;
+        public TileData(int counter, int xInit, int yInit)
+        {
+            index = counter;
+            x = xInit;
+            y = yInit;
+        }
+
+        public int getX()
+        {
+            return x;
+        }
+        public int getY()
+        {
+            return x;
+        }
+        public int getIndex()
+        {
+            return index;
+        }
+
+        private bool isMonasteryTile = false;
+        public bool isMonastery()
+        {
+            return isMonasteryTile;
+        }
+        
+        public void setIsMonastery(bool t)
+        {
+            isMonasteryTile = t;
+        }
+
+        public void setChecked(bool t)
+        {
+            beenChecked = t;
+        }
+
+        public bool isChecked()
+        {
+            return beenChecked;
+        }
+
+    }
+
+ 
+
     public int columns = 8; 
     public int rows = 8;
+    public List<TileData> tileMaster = new List<TileData>();
 
     public bool basicShape = true;
     
@@ -36,7 +89,6 @@ public class BoardManager : MonoBehaviour {
     
     private Transform boardHolder;
     private List <Vector3> gridPositions = new List<Vector3> ();
-    
 
     public GameObject[] pisces;
 
@@ -46,45 +98,53 @@ public class BoardManager : MonoBehaviour {
         // Clear list
         gridPositions.Clear ();
 
-        // Create basic outline of monastery
-
-       
+            int counter = 0;
+            // create legitimate play area
+        
             // Loop through cols
-            for (int x = 1; x < columns - 1; x++)
+            for (int x = -1; x < columns + 1; x++)
             {
                 // Loop through rows
-                for (int y = 1; y < rows - 1; y++)
+                for (int y = -1; y < rows + 1; y++)
                 {
                     // At each index add a new Vector3 
+                    
                     gridPositions.Add(new Vector3(x, y, 0f));
+                    
+                    counter += 1;
                 }
             }
-
     }
 
     void BoardSetup ()
     {
-        boardHolder = new GameObject("Board").transform;
-        if (basicShape)
-        {
-            for (int x = -1; x < columns + 1; x++)
-            {
-                for (int y = -1; y < rows + 1; y++)
-                {
-                    GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
-                    if (x == -1 || x == columns || y == -1 || y == rows)
-                    {
-                        toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
 
-                    }
+
+        boardHolder = new GameObject("Board").transform;
+        int counter = 0;
+        // Generate entire field
+    
+            for (int x = -1; x < columns+1; x++)
+            {
+                for (int y = -1; y < rows+1; y++)
+                {
+                    tileMaster.Add(new TileData(counter, x, y));
+                 
+                    GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                    
+                    // outer limits get outermost tiles
+                    //if (x == -1 || x == columns || y == -1 || y == rows)
+                    //{
+                    //   toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
+                    //}
+
                     GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
 
                     instance.transform.SetParent(boardHolder);
 
                     // See if new tile is within pisces limits
                     foreach (GameObject piscesSphere in pisces)
-                    {
-                        //Debug.Log("Checking if in bounds");
+                    {           
                         RaycastHit hit;
                         if (Physics.Raycast(instance.transform.position, -Vector3.forward, out hit))
                         {
@@ -92,48 +152,105 @@ public class BoardManager : MonoBehaviour {
                             Component[] s = instance.transform.GetComponents<MyTileObject>();
                             foreach (Component com in s)
                             {
-                                // Set boolean to true in each object... 
-                                // Or is it better to have a master array?
                                 com.GetComponent<MyTileObject>().inMonastery = true;
-
+                                tileMaster[counter].setIsMonastery(true);
                             }
-
                         }
                     }
+                    counter += 1;
                 }
             }
 
-        }
-        else
+        
+
+        // Now see if we can find the outer walls of the monastery within the pisces 
+        //
+
+        for (int c = columns + 1; c < columns + 80; c++)
         {
-            for (int x = -1; x < columns + 1; x++)
+            
+            
+            if(tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
             {
-                for (int y = -1; y < rows + 1; y++)
+                Debug.Log("this is " + tileMaster[c].x + " " + tileMaster[c].y + " reporting in");
+                // find tiles above, below, left and right
+                // rules:
+                // if all four sides are in monastery, then definitely not an outer wall
+
+                // using lambda...
+                TileData aboveTile, belowTile, leftTile, rightTile = null;
+
+                List<TileData> sameColumn = tileMaster.FindAll(TileData => TileData.x == tileMaster[c].x);
+
+                try
                 {
-
-
-                    if ((x > 10 && y > 1) || (x > 3 && y > 2)) 
-                    { 
-
-                        GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
-                        
-                        if (x == -1 || x == columns || y == -1 || y == rows)
-                        {
-                            toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
-
-                        }
-                        GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;                    
-                        instance.transform.SetParent(boardHolder);
-                    }
+                    aboveTile = sameColumn.Find(TileData => TileData.y == (tileMaster[c].y + 1));
                 }
+                catch { aboveTile = null; }
+                try
+                {
+                    belowTile = sameColumn.Find(TileData => TileData.y == (tileMaster[c].y - 1));
+                }
+                catch { belowTile = null; }
+   
+                List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == tileMaster[c].y);
+                 try
+                {
+                    leftTile = sameColumn.Find(TileData => TileData.x == (tileMaster[c].x + 1));
+                }
+                 catch { leftTile = null; }
+
+                try
+                {
+                    rightTile = sameColumn.Find(TileData => TileData.x == (tileMaster[c].x - 1));
+                }
+                catch { rightTile = null; }
+
+                try
+                {
+                    Debug.Log("above me x: " + aboveTile.x);
+                    Debug.Log("above me y: " + aboveTile.y);
+                }
+                catch { }
+                try
+                {
+                    Debug.Log("below me x: " + belowTile.x);
+                    Debug.Log("below me y: " + belowTile.y);
+                }
+                catch { }
+                 try
+                {
+                    Debug.Log("left of me x: " + leftTile.x);
+                    Debug.Log("left of me y: " + leftTile.y);
+                }
+                catch{}
+                try{
+                    Debug.Log("right of me x: " + rightTile.x);
+                    Debug.Log("right of me y: " + rightTile.y);
+                }
+                catch { }
+    
             }
+
+            tileMaster[c].setChecked(true);
+
         }
+
+
+      /*  for (int x = -1; x < columns + 1; x++)
+        {
+            for (int y = -1; y < rows + 1; y++)
+            {
+
+            }
+        }*/
+
 
     }
 
     Vector3 RandomPosition()
     {
-        int randomIndex = Random.Range(0, gridPositions.Count);
+        int randomIndex = Random.Range(1, gridPositions.Count);
         Vector3 randomPosition = gridPositions[randomIndex];
         gridPositions.RemoveAt(randomIndex);
         return randomPosition;
