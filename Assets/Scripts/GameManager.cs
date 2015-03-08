@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour {
     private GameObject levelImage;
     private bool doingSetup;
 
+
 	// Use this for initialization
 	void Awake () {
 
@@ -82,6 +83,8 @@ public class GameManager : MonoBehaviour {
         if (playerTurn || enemiesMoving || doingSetup)
             return;
         StartCoroutine(MoveEnemies());
+
+
 
 	}
 
