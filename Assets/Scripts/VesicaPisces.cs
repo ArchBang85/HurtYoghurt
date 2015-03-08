@@ -17,13 +17,10 @@ public class VesicaPisces : MonoBehaviour {
         {
             for (int i = 0; i < stages; i++)
             {
-                Instantiate(pisces, new Vector3(i * pisces.transform.localScale.x / 2, y * 10, 0), Quaternion.identity);
+                Instantiate(pisces, new Vector3(transform.position.x + i * pisces.transform.localScale.x / 2, transform.position.y +  y * 10, 0), Quaternion.identity);
 
             }
             // choose one intersection
-
-
-
             // For each 5th element, add a new side bulb
             int bulbs = 0;
             int s = stages;
@@ -44,9 +41,13 @@ public class VesicaPisces : MonoBehaviour {
                 {
                     vertical = -1;
                 }
-                Instantiate(pisces, new Vector3(pisces.transform.localScale.x / 2 + horisontal * pisces.transform.localScale.x / 2, vertical * pisces.transform.localScale.y / 2 + y * 10, 0), Quaternion.identity);
+                Instantiate(pisces, new Vector3(transform.position.x + pisces.transform.localScale.x / 2 + horisontal * pisces.transform.localScale.x / 2, transform.position.y + vertical * pisces.transform.localScale.y / 2 + y * 10, 0), Quaternion.identity);
             }
         }
+
+
+
+
 	}
 	
 	// Update is called once per frame

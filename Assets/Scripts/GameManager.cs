@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour {
     private int Condition = 1;
     private int Rank = 1;
 
+    public bool doSetup = true;
     public GameObject readyButton;
     public GameObject[] ageOptions = new GameObject[3];
     public GameObject[] conditionOptions = new GameObject[3];
@@ -66,28 +67,30 @@ public class GameManager : MonoBehaviour {
 
     void InitGame()
     {
-        doingSetup = true;
-        charSetup = true;
+        if (doSetup)
+        {
+            doingSetup = true;
+            charSetup = true;
 
-        levelImage = GameObject.Find("LevelImage");
-        levelText = GameObject.Find("LevelText").GetComponent<Text>();
-        HideLevelImage();
+            levelImage = GameObject.Find("LevelImage");
+            levelText = GameObject.Find("LevelText").GetComponent<Text>();
+            HideLevelImage();
 
-        // Character select screen
-        CharSelectionImage = GameObject.Find("CharSelectionImage");
-        CharSelectionImage.SetActive(true);
-        charSelectToggle = GameObject.Find("CharSelectToggle");
-        ageOptions[0] = GameObject.Find("AgeOption1");
-        ageOptions[1] = GameObject.Find("AgeOption2");
-        ageOptions[2] = GameObject.Find("AgeOption3");
-        conditionOptions[0] = GameObject.Find("ConditionOption1");
-        conditionOptions[1] = GameObject.Find("ConditionOption2");
-        conditionOptions[2] = GameObject.Find("ConditionOption3");
-        rankOptions[0] = GameObject.Find("RankOption1");
-        rankOptions[1] = GameObject.Find("RankOption2");
-        rankOptions[2] = GameObject.Find("RankOption3");
-        readyButton = GameObject.Find("ReadyText");
-     
+            // Character select screen
+            CharSelectionImage = GameObject.Find("CharSelectionImage");
+            CharSelectionImage.SetActive(true);
+            charSelectToggle = GameObject.Find("CharSelectToggle");
+            ageOptions[0] = GameObject.Find("AgeOption1");
+            ageOptions[1] = GameObject.Find("AgeOption2");
+            ageOptions[2] = GameObject.Find("AgeOption3");
+            conditionOptions[0] = GameObject.Find("ConditionOption1");
+            conditionOptions[1] = GameObject.Find("ConditionOption2");
+            conditionOptions[2] = GameObject.Find("ConditionOption3");
+            rankOptions[0] = GameObject.Find("RankOption1");
+            rankOptions[1] = GameObject.Find("RankOption2");
+            rankOptions[2] = GameObject.Find("RankOption3");
+            readyButton = GameObject.Find("ReadyText");
+        }
         // Clear out from last level
         enemies.Clear();
         boardScript.SetupScene(level);
