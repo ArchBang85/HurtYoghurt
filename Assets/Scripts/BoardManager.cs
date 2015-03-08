@@ -9,7 +9,7 @@ public class BoardManager : MonoBehaviour {
         
     public GameObject testWall;
     public LayerMask blockingLayer;
-
+    public bool innerWalls = false;
     [Serializable]
     public class Count
     {
@@ -33,6 +33,10 @@ public class BoardManager : MonoBehaviour {
         bool monasteryWall = false;
         public BoxCollider2D boxCollider;
         public GameObject monasteryWallObject = null;
+        public string description;
+        public int yoghurtLevel = 0;
+        public bool hasItems = false;
+
         public TileData(int counter, int xInit, int yInit)
         {
             index = counter;
@@ -146,7 +150,11 @@ public class BoardManager : MonoBehaviour {
                 {
                     tileMaster.Add(new TileData(counter, x, y));
                  
-                    GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                 
+                        GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                    
+                   
+
                     
                     // outer limits get outermost tiles
                     //if (x == -1 || x == columns || y == -1 || y == rows)
@@ -154,24 +162,34 @@ public class BoardManager : MonoBehaviour {
                     //   toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
                     //}
 
-                    GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
-
-                    instance.transform.SetParent(boardHolder);
-
-                    // See if new tile is within pisces limits
-
-                    foreach (GameObject piscesSphere in pisces)
-                    {           
-                        RaycastHit hit;
-                        if (Physics.Raycast(instance.transform.position, -Vector3.forward, out hit))
+                        // leave corners out to make more treetrunklike level
+                        if (( x < 2 && y == 0) || (x > columns - 2 && y == 0) || (x < 2 && y == rows) || (x > columns - 2 && y == rows))
                         {
-                            // What to do if in bounds
-                            //Component[] s = instance.transform.GetComponents<MyTileObject>();
-                            //foreach (Component com in s)
-                            //{
-                                //com.GetComponent<MyTileObject>().inMonastery = true;
-                                tileMaster[counter].setIsMonastery(true);
-                            //}
+
+                        }
+                        else
+                        {
+                            GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+
+                            instance.transform.SetParent(boardHolder);
+                      
+                 
+
+                        // See if new tile is within pisces limits
+
+                        foreach (GameObject piscesSphere in pisces)
+                        {           
+                            RaycastHit hit;
+                            if (Physics.Raycast(instance.transform.position, -Vector3.forward, out hit))
+                            {
+                                // What to do if in bounds
+                                //Component[] s = instance.transform.GetComponents<MyTileObject>();
+                                //foreach (Component com in s)
+                                //{
+                                    //com.GetComponent<MyTileObject>().inMonastery = true;
+                                    tileMaster[counter].setIsMonastery(true);
+                                //}
+                            }
                         }
                     }
                     counter += 1;
@@ -262,7 +280,7 @@ public class BoardManager : MonoBehaviour {
                     
                     tileMaster[c].monasteryWallObject = instance;
                     tileMaster[c].boxCollider = instance.GetComponent<BoxCollider2D>();
-                    checkDirection(1, 0, 15, c);
+                    //checkDirection(1, 0, 15, c);
                 }
 
             }
@@ -274,7 +292,44 @@ public class BoardManager : MonoBehaviour {
         // What about the interior walls?
         // Should be able to use raycasting here to bounce off interior walls
 
- 
+        // Some kind of rules such that rays from tiles past the half-point can only go left,
+        // rays below the midpoint only go up etc
+        
+        // 
+        if(innerWalls)
+        { 
+        for (int c = 1; c < (columns * rows); c++)
+        {
+            if (tileMaster[c].isMonasteryWall())
+            {
+                if (Random.Range(0, 10) < 1)
+                {
+                    int dir = 1;
+                    if (tileMaster[c].x > columns / 2)
+                        dir = -1;
+
+                    Debug.Log("Casting ray");
+
+                    int xDir = 1;
+                    int yDir = 0;
+                    if (Random.Range(0,2)<1)
+                    {
+                        xDir = 0;
+                        yDir = 1;
+                    }
+                    checkDirection(xDir, yDir, dir * 15, c);
+                    
+                    for(int d = 1; d < 10; d++)
+                    {
+                        GameObject instance = Instantiate(testWall, new Vector3(tileMaster[c].x + d*dir, tileMaster[c].y, 0), Quaternion.identity) as GameObject;
+                        
+                    }
+
+                }
+            }
+        }
+       
+    }
 
     }
 
