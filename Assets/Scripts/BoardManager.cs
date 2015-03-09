@@ -36,6 +36,12 @@ public class BoardManager : MonoBehaviour {
         public string description;
         public int yoghurtLevel = 0;
         public bool hasItems = false;
+        // neighbouring tiles as integers
+        // 0 1 2 
+        // 3 c 4
+        // 5 6 7
+
+        public int[] nbTiles = new int[8];
 
         public TileData(int counter, int xInit, int yInit)
         {
@@ -88,7 +94,33 @@ public class BoardManager : MonoBehaviour {
             return monasteryWall;
         }
 
+        // helper method
+        public void showNeighbours(List<TileData> tM)
+        {
+            // neighbouring tiles as integers //
 
+            ///////////
+            // 0 1 2 //
+            // 3 c 4 //
+            // 5 6 7 //
+            ///////////
+            Debug.Log("To my up left is a tile indexed at: " + nbTiles[0]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[0]].x + ", " + tM[nbTiles[0]].y);
+            Debug.Log("Above me is a tile indexed at: " + nbTiles[1]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[1]].x + ", " + tM[nbTiles[1]].y);
+            Debug.Log("To my up right is a tile indexed at: " + nbTiles[2]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[2]].x + ", " + tM[nbTiles[2]].y);
+            Debug.Log("To my left is a tile indexed at: " + nbTiles[3]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[3]].x + ", " + tM[nbTiles[3]].y);
+            Debug.Log("To my right is a tile indexed at: " + nbTiles[4]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[4]].x + ", " + tM[nbTiles[4]].y);
+            Debug.Log("To my bottom left is a tile indexed at: " + nbTiles[5]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[5]].x + ", " + tM[nbTiles[5]].y);
+            Debug.Log("Below me is a tile indexed at: " + nbTiles[6]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[6]].x + ", " + tM[nbTiles[6]].y);
+            Debug.Log("To my bottom right is a tile indexed at: " + nbTiles[7]);
+            Debug.Log("The coordinates for that tile are: " + tM[nbTiles[7]].x + ", " + tM[nbTiles[7]].y);    
+        }
 
     }
 
@@ -153,9 +185,6 @@ public class BoardManager : MonoBehaviour {
                  
                         GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
                     
-                   
-
-                    
                     // outer limits get outermost tiles
                     //if (x == -1 || x == columns || y == -1 || y == rows)
                     //{
@@ -200,11 +229,12 @@ public class BoardManager : MonoBehaviour {
 
         // Now see if we can find the outer walls of the monastery within the pisces 
         //
+         
         for (int c = 1; c < (columns * rows); c++)
         {
+            int[] neighbours = new int[8];
             TileData aboveTile, belowTile, leftTile, rightTile = null;
-            if(tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
-            {
+            
                 //Debug.Log("this is " + tileMaster[c].x + " " + tileMaster[c].y + " reporting in");
                 
                 // find tiles above, below, left and right
@@ -213,64 +243,73 @@ public class BoardManager : MonoBehaviour {
 
                 // GROUP 
                 // using lambda for the first time ever...
-                
+                // Store neighbour awareness into each tile
                 List<TileData> sameColumn = tileMaster.FindAll(TileData => TileData.x == tileMaster[c].x);
-
-                try
-                {
-                    aboveTile = sameColumn.Find(TileData => TileData.y == (tileMaster[c].y + 1));
-                }
-                catch { aboveTile = null; }
-                try
-                {
-                    belowTile = sameColumn.Find(TileData => TileData.y == (tileMaster[c].y - 1));
-                }
-                catch { belowTile = null; }
-   
+                List<TileData> priorColumn = tileMaster.FindAll(TileData => TileData.x == tileMaster[c].x-1);
+                List<TileData> nextColumn = tileMaster.FindAll(TileData => TileData.x == tileMaster[c].x+1);
                 List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == tileMaster[c].y);
-                 try
+
+                // up left tile
+                try
                 {
-                    leftTile = sameRow.Find(TileData => TileData.x == (tileMaster[c].x - 1));
+                   tileMaster[c].nbTiles[0] = priorColumn.Find(TileData => TileData.y == (tileMaster[c].y + 1)).getIndex();
                 }
-                 catch { leftTile = null; }
+                catch { tileMaster[c].nbTiles[0] = -1; }
+
+                // above tile
+                try
+                {
+                    tileMaster[c].nbTiles[1] =  sameColumn.Find(TileData => TileData.y == (tileMaster[c].y + 1)).getIndex();
+                }
+                catch { tileMaster[c].nbTiles[1] = -1; }
+
+                // up right tile
+                try
+                {
+                    tileMaster[c].nbTiles[2] = nextColumn.Find(TileData => TileData.y == (tileMaster[c].y + 1)).getIndex();
+                }
+                catch { tileMaster[c].nbTiles[2] = -1; }
+
+                // left tile
+                try
+                {
+                    tileMaster[c].nbTiles[3] = sameRow.Find(TileData => TileData.x == (tileMaster[c].x - 1)).getIndex();
+                }
+                catch { tileMaster[c].nbTiles[3] = -1; }
+
+                // right tile
+                try
+                {
+                    tileMaster[c].nbTiles[4] = sameRow.Find(TileData => TileData.x == (tileMaster[c].x + 1)).getIndex();
+                }
+                catch { tileMaster[c].nbTiles[4] = -1; }
+
+                // up left tile
+                try
+                {
+                    tileMaster[c].nbTiles[5] = priorColumn.Find(TileData => TileData.y == (tileMaster[c].y - 1)).getIndex();
+                }
+                catch { tileMaster[c].nbTiles[5] = -1; }
 
                 try
                 {
-                    rightTile = sameRow.Find(TileData => TileData.x == (tileMaster[c].x + 1));
+                    tileMaster[c].nbTiles[6] = sameColumn.Find(TileData => TileData.y == (tileMaster[c].y - 1)).getIndex();
                 }
-                catch { rightTile = null; }
+                catch { tileMaster[c].nbTiles[6] = -1; }
 
-                /*
                 try
                 {
-                    Debug.Log("above me x: " + aboveTile.x);
-                    Debug.Log("above me y: " + aboveTile.y);
+                    tileMaster[c].nbTiles[7] = nextColumn.Find(TileData => TileData.y == (tileMaster[c].y - 1)).getIndex();
                 }
-                catch { }
-                try
-                {
-                    Debug.Log("below me x: " + belowTile.x);
-                    Debug.Log("below me y: " + belowTile.y);
-                }
-                catch { }
-                try
-                {
-                    Debug.Log("left of me x: " + leftTile.x);
-                    Debug.Log("left of me y: " + leftTile.y);
-                }
-                catch{}
-                try{
-                    Debug.Log("right of me x: " + rightTile.x);
-                    Debug.Log("right of me y: " + rightTile.y);
-                }
-                catch { }
-                */
+                catch { tileMaster[c].nbTiles[7] = -1; }
 
+
+            if (tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
+            {
                 // All 
-                if ((aboveTile.isMonastery() && rightTile.isMonastery() && leftTile.isMonastery() && belowTile.isMonastery()))
+                if ((tileMaster[tileMaster[c].nbTiles[1]].isMonastery() && tileMaster[tileMaster[c].nbTiles[4]].isMonastery() && tileMaster[tileMaster[c].nbTiles[3]].isMonastery() && tileMaster[tileMaster[c].nbTiles[6]].isMonastery()))
                 {
-                    // Definitely not a monastery outer wall if all sides are surrounded by monastery
-              
+                    // Definitely not a monastery outer wall if all sides are surrounded by monastery      
                 }
                 else
                 {
@@ -282,11 +321,8 @@ public class BoardManager : MonoBehaviour {
                     tileMaster[c].boxCollider = instance.GetComponent<BoxCollider2D>();
                     //checkDirection(1, 0, 15, c);
                 }
-
             }
-
             tileMaster[c].setChecked(true);
-
         }
 
         // What about the interior walls?
@@ -294,7 +330,7 @@ public class BoardManager : MonoBehaviour {
 
         // Some kind of rules such that rays from tiles past the half-point can only go left,
         // rays below the midpoint only go up etc
-        
+        tileMaster[295].showNeighbours(tileMaster);
         // 
         if(innerWalls)
         { 
@@ -354,6 +390,8 @@ public class BoardManager : MonoBehaviour {
         return false;
     }
 
+
+
     Vector3 RandomPosition()
     {
         int randomIndex = Random.Range(1, gridPositions.Count);
@@ -376,6 +414,8 @@ public class BoardManager : MonoBehaviour {
 
         }
     }
+
+
 
     public void SetupScene(int level)
     {
