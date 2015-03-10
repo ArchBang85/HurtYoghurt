@@ -122,8 +122,8 @@ public class BoardManager : MonoBehaviour {
                 // Catch cases where tile doesn't exist
                 if (targetTile != -1)
                 {
-                    // Make sure yoghurt doesn't exist on tile already
-                    if (tM[targetTile].yoghurtOnTile == null)
+                    // Make sure yoghurt doesn't exist on tile already and isn't growing on a wall
+                    if (tM[targetTile].yoghurtOnTile == null && !tM[targetTile].isMonasteryWall())
                     {
                         // Make sure can't grow more than once a turn
                         if (!grownThisTurn)
@@ -388,6 +388,7 @@ public class BoardManager : MonoBehaviour {
         for (int g = 0; g < 8; g++ )
         {
             Instantiate(testWall, new Vector3(tileMaster[tileMaster[295].nbTiles[g]].x, tileMaster[tileMaster[295].nbTiles[g]].y, 0), Quaternion.identity);
+            tileMaster[tileMaster[295].nbTiles[g]].setMonasteryWall(true);
         }
 
 

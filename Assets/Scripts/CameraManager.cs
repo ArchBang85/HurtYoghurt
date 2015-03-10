@@ -5,7 +5,7 @@ public class CameraManager : MonoBehaviour {
 
     public GameObject player;
 
-    public int orthographicSizeMin = 10;
+    public int orthographicSizeMin = 9;
     public int orthographicSizeMax = 15;
 
     public int closerSizeMin = 4;
