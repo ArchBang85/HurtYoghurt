@@ -10,7 +10,7 @@ public class CameraManager : MonoBehaviour {
 
     public int closerSizeMin = 4;
     public int closerSizeMax = 9;
-
+    private int cameraCounter = 0;
     private Vector3 startPos = new Vector3(21, 14,0);
     
     // Use this for initialization
@@ -41,8 +41,10 @@ public class CameraManager : MonoBehaviour {
 
             if (Camera.main.orthographicSize > 9)
             {
-                // Centre camera
-                transform.position = new Vector3(startPos.x, startPos.y, -10);
+              
+                    // Centre camera
+                    transform.position = new Vector3(startPos.x, startPos.y, -10);
+
 
             }
 
@@ -52,9 +54,16 @@ public class CameraManager : MonoBehaviour {
 
     public void updatePosition(int x, int y)
     {
+        // Camera zoomed in sufficiently for movement to be warranted
         if (Camera.main.orthographicSize < orthographicSizeMin)
-        { 
-            transform.position = new Vector3(x, y, -10);
+        {   
+            
+            if (cameraCounter > 3)
+                {
+                    transform.position = new Vector3(x, y, -10);
+                    cameraCounter = 0;
+                }
+           cameraCounter++;
         }
     }
 

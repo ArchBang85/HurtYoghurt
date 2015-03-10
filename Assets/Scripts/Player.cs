@@ -103,7 +103,7 @@ public class Player : MovingObject {
         if (horisontal != 0 || vertical != 0)
         {
             AttemptMove<Walls>(horisontal, vertical);
-           // mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
+           mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
 
         }
 	}

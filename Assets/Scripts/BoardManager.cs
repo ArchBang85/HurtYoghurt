@@ -8,6 +8,7 @@ using Random = UnityEngine.Random; // Need to specify because there's an overlap
 public class BoardManager : MonoBehaviour {
         
     public GameObject testWall;
+    public GameObject yoghurt;
     public LayerMask blockingLayer;
     public bool innerWalls = false;
     [Serializable]
@@ -23,6 +24,15 @@ public class BoardManager : MonoBehaviour {
             }
     }
 
+    public void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.G))
+        {
+            yoghurtBehaviour();
+        }
+
+    }
+
     public class TileData
     {
         
@@ -35,6 +45,8 @@ public class BoardManager : MonoBehaviour {
         public GameObject monasteryWallObject = null;
         public string description;
         public int yoghurtLevel = 0;
+        public GameObject yoghurtOnTile;
+        public bool grownThisTurn = false;
 
 
         public bool hasItems = false;
@@ -95,6 +107,44 @@ public class BoardManager : MonoBehaviour {
         {
             return monasteryWall;
         }
+
+        public void yoghurtGrow(List<TileData> tM, GameObject yoghurt)
+        {
+            if(yoghurtOnTile != null)
+            {
+                // Get randomised cardinal directions
+                int r = Random.Range(1, 5);
+                if (r == 2)
+                    r = 6;
+               
+                int targetTile = nbTiles[r];
+
+                // Catch cases where tile doesn't exist
+                if (targetTile != -1)
+                {
+                    // Make sure yoghurt doesn't exist on tile already
+                    if (tM[targetTile].yoghurtOnTile == null)
+                    {
+                        // Make sure can't grow more than once a turn
+                        if (!grownThisTurn)
+                        {
+                            // Different growth processes
+
+                            tM[targetTile].yoghurtOnTile = Instantiate(yoghurt, new Vector3(tM[targetTile].x, tM[targetTile].y, 0), Quaternion.identity) as GameObject;
+                        
+                            
+                            
+                            
+                            
+                            
+                            
+                            tM[targetTile].grownThisTurn = true;
+                        }
+                    }
+                }
+            }
+        }
+
 
         // helper method
         public void showNeighbours(List<TileData> tM)
@@ -232,7 +282,7 @@ public class BoardManager : MonoBehaviour {
         // Now see if we can find the outer walls of the monastery within the pisces 
         //
          
-        for (int c = 1; c < (columns * rows); c++)
+        for (int c = 0; c < tileMaster.Count; c++)
         {
             int[] neighbours = new int[8];
             TileData aboveTile, belowTile, leftTile, rightTile = null;
@@ -376,7 +426,33 @@ public class BoardManager : MonoBehaviour {
 
             }
 
+
+
+        yoghurtBehaviour();
     }
+
+    void yoghurtBehaviour()
+    {
+
+        // reset growth allowance
+        for (int i = 0; i < tileMaster.Count; i++)
+        {
+            tileMaster[i].grownThisTurn = false;    
+        }
+
+        tileMaster[444].yoghurtOnTile = Instantiate(yoghurt, new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
+        
+        for (int i = 0; i < tileMaster.Count; i++)
+        {
+            if(tileMaster[i].yoghurtOnTile != null)
+            {
+                tileMaster[i].yoghurtGrow(tileMaster, yoghurt);
+            }
+        }
+
+
+    }
+
 
     bool checkDirection(int xDir, int yDir, int range, int tileIndex)
     {
@@ -399,8 +475,6 @@ public class BoardManager : MonoBehaviour {
         return false;
     }
 
-
-
     Vector3 RandomPosition()
     {
         int randomIndex = Random.Range(1, gridPositions.Count);
@@ -420,11 +494,8 @@ public class BoardManager : MonoBehaviour {
             GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
             Instantiate(tileChoice, randomPosition, Quaternion.identity);
 
-
         }
     }
-
-
 
     public void SetupScene(int level)
     {
