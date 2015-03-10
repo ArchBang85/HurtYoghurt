@@ -11,6 +11,7 @@ public class Player : MovingObject {
     public float restartLevelDelay = 1f;
     public Text foodText;
 
+    private GameObject mainCam;
     private Animator animator;
     private int food;
 
@@ -19,7 +20,7 @@ public class Player : MovingObject {
         animator = GetComponent<Animator>();
         food = GameManager.instance.playerFoodPoints;
         foodText.text = "Food " + food;
-
+        mainCam = GameObject.Find("Main Camera");
         base.Start();
 	}
 	
@@ -102,6 +103,7 @@ public class Player : MovingObject {
         if (horisontal != 0 || vertical != 0)
         {
             AttemptMove<Walls>(horisontal, vertical);
+           // mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
 
         }
 	}

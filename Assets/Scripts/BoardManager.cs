@@ -35,6 +35,8 @@ public class BoardManager : MonoBehaviour {
         public GameObject monasteryWallObject = null;
         public string description;
         public int yoghurtLevel = 0;
+
+
         public bool hasItems = false;
         // neighbouring tiles as integers
         // 0 1 2 
@@ -304,6 +306,7 @@ public class BoardManager : MonoBehaviour {
                 catch { tileMaster[c].nbTiles[7] = -1; }
 
 
+           
             if (tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
             {
                 // All 
@@ -330,42 +333,48 @@ public class BoardManager : MonoBehaviour {
 
         // Some kind of rules such that rays from tiles past the half-point can only go left,
         // rays below the midpoint only go up etc
-        tileMaster[295].showNeighbours(tileMaster);
+        //tileMaster[295].showNeighbours(tileMaster);
         // 
-        if(innerWalls)
-        { 
-        for (int c = 1; c < (columns * rows); c++)
+        for (int g = 0; g < 8; g++ )
         {
-            if (tileMaster[c].isMonasteryWall())
-            {
-                if (Random.Range(0, 10) < 1)
-                {
-                    int dir = 1;
-                    if (tileMaster[c].x > columns / 2)
-                        dir = -1;
-
-                    Debug.Log("Casting ray");
-
-                    int xDir = 1;
-                    int yDir = 0;
-                    if (Random.Range(0,2)<1)
-                    {
-                        xDir = 0;
-                        yDir = 1;
-                    }
-                    checkDirection(xDir, yDir, dir * 15, c);
-                    
-                    for(int d = 1; d < 10; d++)
-                    {
-                        GameObject instance = Instantiate(testWall, new Vector3(tileMaster[c].x + d*dir, tileMaster[c].y, 0), Quaternion.identity) as GameObject;
-                        
-                    }
-
-                }
-            }
+            Instantiate(testWall, new Vector3(tileMaster[tileMaster[295].nbTiles[g]].x, tileMaster[tileMaster[295].nbTiles[g]].y, 0), Quaternion.identity);
         }
-       
-    }
+
+
+            if (innerWalls)
+            {
+                for (int c = 1; c < (columns * rows); c++)
+                {
+                    if (tileMaster[c].isMonasteryWall())
+                    {
+                        if (Random.Range(0, 10) < 1)
+                        {
+                            int dir = 1;
+                            if (tileMaster[c].x > columns / 2)
+                                dir = -1;
+
+                            Debug.Log("Casting ray");
+
+                            int xDir = 1;
+                            int yDir = 0;
+                            if (Random.Range(0, 2) < 1)
+                            {
+                                xDir = 0;
+                                yDir = 1;
+                            }
+                            checkDirection(xDir, yDir, dir * 15, c);
+
+                            for (int d = 1; d < 10; d++)
+                            {
+                                GameObject instance = Instantiate(testWall, new Vector3(tileMaster[c].x + d * dir, tileMaster[c].y, 0), Quaternion.identity) as GameObject;
+
+                            }
+
+                        }
+                    }
+                }
+
+            }
 
     }
 
