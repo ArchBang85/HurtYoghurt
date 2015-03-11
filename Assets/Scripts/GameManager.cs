@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour {
     private int Rank = 1;
 
     public bool doSetup = true;
+    pub;ic bool doTargetting = true;
     public GameObject readyButton;
     public GameObject[] ageOptions = new GameObject[3];
     public GameObject[] conditionOptions = new GameObject[3];
@@ -37,6 +38,8 @@ public class GameManager : MonoBehaviour {
     private int optionType = 0;
     // Storing the player's selections
     private int[] characterCharacteristics = new int[3];
+
+    private GameObject player;
 
     public GameObject charSelectToggle;
 
@@ -97,6 +100,65 @@ public class GameManager : MonoBehaviour {
         enemies.Clear();
         piscesScript.setupPisces();
         boardScript.SetupScene(level);
+        // Set the player object
+        player = Find.GameObject("Player");
+    }
+
+    int[] getDirection()
+    {
+
+        int horisontal = 0;
+        int vertical = 0;
+
+        horisontal = (int)Input.GetAxisRaw("Horizontal");
+        vertical = (int)Input.GetAxisRaw("Vertical");
+
+
+        // Take regular movement also from keypad
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            vertical = -1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad4))
+        {
+            horisontal = -1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad6))
+        {
+            horisontal = 1;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad8))
+        {
+            vertical = 1;
+        }
+
+        // take diagonal movement from corner keys
+
+        if (Input.GetKeyDown(KeyCode.Keypad1) || Input.GetKeyDown(KeyCode.End))
+        {
+            horisontal = -1;
+            vertical = -1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad3) || Input.GetKeyDown(KeyCode.PageDown))
+        {
+            horisontal = 1;
+            vertical = -1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad7) || Input.GetKeyDown(KeyCode.Home))
+        {
+            horisontal = -1;
+            vertical = 1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Keypad9) || Input.GetKeyDown(KeyCode.PageUp))
+        {
+            horisontal = 1;
+            vertical = 1;
+        }
+
+        int[] results = new int[2];
+        results[0] = horisontal;
+        results[1] = vertical;
+        return results;
     }
 
     private void ShowLevelImage()
@@ -226,6 +288,69 @@ public class GameManager : MonoBehaviour {
 
 
     }
+
+    void setState(bool state)
+    {
+        // Best way to do this would be to have some enum of states rather than true / false
+        if(doingSetup)
+        {
+            charSetup = false;
+
+
+        }
+    }
+
+
+    void objectTargetting(GameObject itemToUse)
+    {
+        // Initiate object targetting
+        // doSetup = true;
+
+
+        // should suspend other types of movement
+
+        // Activate targetting reticule
+        // targettingReticule.enabled = true;
+        
+        // Centre it on the player
+        // targetReticule.position = new Vector3(player.position.x, player.position.y, 0);
+
+        // Loop of targetting action
+        //
+
+            // Attempt move
+            // int[] directionVector = GetDirection();
+
+            // Cancel targetting using ESC etcetera
+            /*
+             * if (Input.GetKey(KeyCode.Escape)) {
+             * 
+             *      // 
+             * }
+             * /
+
+            // Select target tile and do something
+           /* if (Input.GetKey(KeyCode.Retunr) || Input.GetKey(KeyCode.KeypadEnter))
+            {
+
+             * Movement needs to take into account walls and other obstacles
+             * 
+             * 
+             * 
+             * 
+            }
+             * 
+             * // What about a tile information label when hovering over them?
+             * // Interact with an UI element and pick out data from the tile.
+             * // The more interaction there is with the board the more this should be in the Boardmanager
+             * 
+             * // If cancelling or actioning:
+             * // Need to hide targetting reticule
+             * // and resume normal functioning
+            */
+
+    }
+
 
     void charOptionSelect(int optionType, int optionIndex)
     {
