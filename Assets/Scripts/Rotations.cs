@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Rotations : MonoBehaviour
 {
+    public bool manual = false;
     public float speed = 5.0f;
     // Use this for initialization
     void Start()
@@ -19,11 +20,13 @@ public class Rotations : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    /*
-        if (Input.GetKey(KeyCode.R))
+        if (manual)
         {
-            transform.Rotate(-Vector3.right, speed * Time.deltaTime, Space.World);
+            if (Input.GetKey(KeyCode.T))
+            {
+                transform.Rotate(-Vector3.up, 90, Space.World);
 
-    }*/
+            }
+        }
     }
 }

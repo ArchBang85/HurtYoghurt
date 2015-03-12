@@ -110,32 +110,66 @@ public class BoardManager : MonoBehaviour {
             }
             }
        
+        void spinObject(GameObject obj)
+        {
+
+            int rotateChance = Random.Range(0, 10);
+            if (rotateChance < 5)
+            {
+                int rotationAmount = 90;
+                if (Random.Range(0, 2) < 1)
+                {
+                    rotationAmount = 45;
+                }
+                obj.transform.Rotate(-Vector3.forward, rotationAmount, Space.World);
+            }
+
+        }
+
         public void updateYoghurt(GameObject[] yogTypes, GameObject yoghurtHolder)
         {
             if (yoghurtLevel > 5) yoghurtLevel = 5;
             if (yoghurtLevel < 0) yoghurtLevel = 0;
 
+
+            // What happens should depend on floor type
+            
+
+
             if(yoghurtLevel == 1)
             {
                 // basic yoghurt level, one splodge
                 if(myYoghurt == null)
-                { 
+                {
+             
+                    // find out about rotation opportunities 
                     GameObject yogInstance = Instantiate(yogTypes[0], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+              
                     myYoghurt = yogInstance;
+  
+                    if (Random.Range(0, 10) < 5)
+                    {
+                        spinObject(yogInstance);
+                    }
                     //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
                 }
             } else if (yoghurtLevel == 2)
             {
-                //if (grownThisTurn)
-                //{
-                    // remove previous splodge
+                // remove previous splodge
                     Destroy(myYoghurt);
                     myYoghurt = null;
                     // two splodges
                    // Debug.Log("creating double splodge");
                     GameObject yogInstance = Instantiate(yogTypes[1], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+        
+                
                     myYoghurt = yogInstance;
+
+                    if (Random.Range(0, 10) < 5)
+                    {
+                        spinObject(yogInstance);
+                    }
                     //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
                 //}
@@ -149,6 +183,10 @@ public class BoardManager : MonoBehaviour {
               //  Debug.Log("creating triple splodge");
                 GameObject yogInstance = Instantiate(yogTypes[2], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
                 myYoghurt = yogInstance;
+                if (Random.Range(0, 10) < 5)
+                {
+                    spinObject(yogInstance);
+                }
                 //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
             } else if (yoghurtLevel == 4)
@@ -161,6 +199,10 @@ public class BoardManager : MonoBehaviour {
               //  Debug.Log("creating triple splodge");
                 GameObject yogInstance = Instantiate(yogTypes[3], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
                 myYoghurt = yogInstance;
+                if (Random.Range(0, 10) < 5)
+                {
+                    spinObject(yogInstance);
+                }
             } else if (yoghurtLevel == 5)
             {
                 // MAXIMUM YOGHURT
@@ -169,9 +211,19 @@ public class BoardManager : MonoBehaviour {
                 myYoghurt = null;
                 // two splodges
               //  Debug.Log("creating maximum splodge");
+                int rotationAmount = 90;
+                if (Random.Range(0, 2) < 1)
+                {
+                    rotationAmount = 45;
+                } 
                 GameObject yogInstance = Instantiate(yogTypes[4], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
                 myYoghurt = yogInstance;
+                if (Random.Range(0, 10) < 5)
+                {
+                    spinObject(yogInstance);
+                }
             }
+ 
 
         }
 
@@ -234,10 +286,6 @@ public class BoardManager : MonoBehaviour {
         {
             return monasteryWall;
         }
-
-       
-        
-
 
         // helper method
         public void showNeighbours(List<TileData> tM)
