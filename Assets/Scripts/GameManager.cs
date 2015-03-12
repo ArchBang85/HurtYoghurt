@@ -122,7 +122,7 @@ public class GameManager : MonoBehaviour {
 
     public void GameOver()
     {
-        levelText.text = "After " + level + " days, you starved to death.";
+        levelText.text = "After " + level + " levels, you were fermented.";
         levelImage.SetActive(true);
         enabled = false;
     }

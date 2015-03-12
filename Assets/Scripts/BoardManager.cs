@@ -135,9 +135,6 @@ public class BoardManager : MonoBehaviour {
                             
                             
                             
-                            
-                            
-                            
                             tM[targetTile].grownThisTurn = true;
                         }
                     }
