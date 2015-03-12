@@ -66,7 +66,7 @@ public class LogManager : MonoBehaviour
     }
 
     // A method that takes new messages and pops it into the array of messages, rotates the roll, removes old messages and adds the new one to the top
-    void logMessage(string s)
+    public void logMessage(string s)
     {
         string s1 = null;
         string s2 = null;

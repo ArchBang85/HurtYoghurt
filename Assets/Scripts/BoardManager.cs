@@ -6,16 +6,22 @@ using Random = UnityEngine.Random; // Need to specify because there's an overlap
 //namespace Completed;
 
 public class BoardManager : MonoBehaviour {
-        
+
     public GameObject testWall;
     public GameObject yoghurt;
     public LayerMask blockingLayer;
+    public GameObject playerObject;
     public bool innerWalls = false;
-
 
     void Awake()
     {
+        playerObject = GameObject.Find("Player");
+        
+    }
 
+    void Start()
+    {
+       
     }
     [Serializable]
     public class Count
@@ -36,6 +42,10 @@ public class BoardManager : MonoBehaviour {
         {
             yoghurtBehaviour();
         }
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            areaEffect(0, 1, 600, tileMaster, 1);
+        }
 
     }
 
@@ -49,11 +59,82 @@ public class BoardManager : MonoBehaviour {
         bool monasteryWall = false;
         public BoxCollider2D boxCollider;
         public GameObject monasteryWallObject = null;
+        public GameObject myFloor = null;
+        public GameObject myYoghurt;
         public string description;
+        public int floorType = 0;
+        private int floorTypeMax = 4;
+
         public int yoghurtLevel = 0;
-        public GameObject yoghurtOnTile;
+        private int yoghurtLevelMax = 4;
+
         public bool grownThisTurn = false;
 
+        public void updateColour()
+        {
+            // Allow yoghurtlevel to loop around 
+            if(floorType > floorTypeMax)
+            {
+                floorType = 0;
+            } else if (floorType < 0)
+            {
+                floorType = floorTypeMax;
+            }
+
+            if (floorType == 0)
+            {
+                // standard
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
+            }
+            else if (floorType == 1)
+            {
+                // green
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
+            }
+            else if (floorType == 2)
+            {
+                // cyan
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
+            }
+            else if (floorType == 3)
+            {
+                // ochre
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
+            }
+            else if (floorType == 4)
+            {
+                // yellow
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
+            }
+            }
+       
+        public void updateYoghurt()
+        {
+            if (yoghurtLevel > 4) yoghurtLevel = 4;
+            if (yoghurtLevel < 0) yoghurtLevel = 0;
+
+            if(yoghurtLevel == 0)
+            {
+                // basic yoghurt level, one splodge
+            } else if (yoghurtLevel == 1)
+            {
+                // two splodges
+            } else if (yoghurtLevel == 2)
+            {
+                // three splodges
+
+            } else if (yoghurtLevel == 3)
+            {
+                // Getting yoghurty!
+                // Movement will slow
+
+            } else if (yoghurtLevel == 4)
+            {
+                // MAXIMUM YOGHURT
+                // full sprite, can no longer travel
+            }
+
+        }
 
         public bool hasItems = false;
         // neighbouring tiles as integers
@@ -63,6 +144,7 @@ public class BoardManager : MonoBehaviour {
 
         public int[] nbTiles = new int[8];
 
+        // constructor
         public TileData(int counter, int xInit, int yInit)
         {
             index = counter;
@@ -116,7 +198,8 @@ public class BoardManager : MonoBehaviour {
 
         public void yoghurtGrow(List<TileData> tM, GameObject yoghurt)
         {
-            if(yoghurtOnTile != null)
+            // Remember to also learn how to remove this
+            if(myYoghurt != null)
             {
                 // Get randomised cardinal directions
                 int r = Random.Range(1, 5);
@@ -129,15 +212,17 @@ public class BoardManager : MonoBehaviour {
                 if (targetTile != -1)
                 {
                     // Make sure yoghurt doesn't exist on tile already and isn't growing on a wall
-                    if (tM[targetTile].yoghurtOnTile == null && !tM[targetTile].isMonasteryWall())
+                    if (tM[targetTile].myYoghurt == null && !tM[targetTile].isMonasteryWall())
                     {
                         // Make sure can't grow more than once a turn
                         if (!grownThisTurn)
                         {
                             // Different growth processes
 
-                            tM[targetTile].yoghurtOnTile = Instantiate(yoghurt, new Vector3(tM[targetTile].x, tM[targetTile].y, 0), Quaternion.identity) as GameObject;
-                        
+
+                            tM[targetTile].myYoghurt = Instantiate(yoghurt, new Vector3(tM[targetTile].x, tM[targetTile].y, 0), Quaternion.identity) as GameObject;
+                            tM[targetTile].yoghurtLevel += 1;
+                            tM[targetTile].updateYoghurt();
                             
                             
                             
@@ -224,6 +309,9 @@ public class BoardManager : MonoBehaviour {
             }
     }
 
+    /// <summary>
+    /// MAP GENERATION
+    /// </summary>
     void BoardSetup ()
     {
 
@@ -266,52 +354,32 @@ public class BoardManager : MonoBehaviour {
                             if (Physics.Raycast(new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0), -Vector3.forward, out hit))
                             {
                                 // What to do if in bounds
-                                //Component[] s = instance.transform.GetComponents<MyTileObject>();
-                                //foreach (Component com in s)
-                                //{
-                                    //com.GetComponent<MyTileObject>().inMonastery = true;
-                                    tileMaster[counter].setIsMonastery(true);
-                                    if (tileMaster[counter].hasTile == false)
-                                    {
-                                        toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
-                                        GameObject instance = Instantiate(toInstantiate, new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0f), Quaternion.identity) as GameObject;
-                                        instance.transform.SetParent(boardHolder);
+                                // Create monastery floor tile
+                                tileMaster[counter].setIsMonastery(true);
+                                if (tileMaster[counter].hasTile == false)
+                                {
+                                    toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                                    GameObject instance = Instantiate(toInstantiate, new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0f), Quaternion.identity) as GameObject;
+                                    instance.transform.SetParent(boardHolder);                                        
+                                    tileMaster[counter].hasTile = true;
+                                    tileMaster[counter].myFloor = instance;   
+                                    tileMaster[counter].floorType = 2;
+                                    
+                                    tileMaster[counter].updateColour();
 
-                                        int colorChoice = Random.Range(0, 5);
-                                        if(colorChoice == 0)
-                                        {
-
-                                        } else if (colorChoice == 1)
-                                        {
-                                            // green
-                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
-                                        } else if (colorChoice == 2)
-                                        {
-                                            // cyan
-                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
-                                        } else if (colorChoice == 3)
-                                        {
-                                            // ochre
-                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
-                                        } else if (colorChoice == 4)
-                                        {
-                                            // yellow
-                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
-                                        }
-
-                                        
-                                        tileMaster[counter].hasTile = true;
-                                    }
+                                }
 
                             }
                             else
                             {
                                 if (tileMaster[counter].hasTile == false)
                                 {
+                                    // Create tile outside monastery boundaries
                                     toInstantiate = outFloorTiles[Random.Range(0, outFloorTiles.Length)];
                                     GameObject instance = Instantiate(toInstantiate, new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0f), Quaternion.identity) as GameObject;
                                     instance.transform.SetParent(boardHolder);
-                                    tileMaster[counter].hasTile = true; 
+                                    tileMaster[counter].hasTile = true;
+                                    tileMaster[counter].myFloor = instance;
                                 }
                         }
                         }
@@ -320,11 +388,7 @@ public class BoardManager : MonoBehaviour {
                 }
             }
 
-        
-
-        // Now see if we can find the outer walls of the monastery within the pisces 
-        //
-         
+        // Now see if we can find the outer walls of the monastery within the pisces          
         for (int c = 0; c < tileMaster.Count; c++)
         {
             int[] neighbours = new int[8];
@@ -485,16 +549,84 @@ public class BoardManager : MonoBehaviour {
             tileMaster[i].grownThisTurn = false;    
         }
 
-        tileMaster[444].yoghurtOnTile = Instantiate(yoghurt, new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
+        tileMaster[444].myYoghurt = Instantiate(yoghurt, new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
         
         for (int i = 0; i < tileMaster.Count; i++)
         {
-            if(tileMaster[i].yoghurtOnTile != null)
+            if(tileMaster[i].myYoghurt != null)
             {
                 tileMaster[i].yoghurtGrow(tileMaster, yoghurt);
             }
         }
+    }
 
+    void areaEffect(int areaEffectType, int range, int tileIndex, List<TileData>tM,  int areaEffectImpact = -1)
+    {
+        // Get player coordinates
+        int x = (int)playerObject.transform.position.x;
+        int y = (int)playerObject.transform.position.y;
+
+        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == y);
+        // Players tile on tilemap
+        int activeTileIndex = sameRow.Find(TileData => TileData.x == x).getIndex();
+
+        // Types of effects:
+        // Either impact FLOOR or YOGHURT
+
+        // 0 FLOOR
+        // 1 YOGHURT
+
+        // // // // // // // 
+        // FLOOR IMPACT   //
+        // // // // // // //
+
+        if (areaEffectType == 0)
+        {
+            if (range == 1)
+            {
+                // Do own tile
+                tM[activeTileIndex].floorType += areaEffectImpact;
+                tM[activeTileIndex].updateColour();
+
+                // Do immediately surrounding tiles
+                for (int g = 0; g < 8; g++)
+                {
+                   if(tM[tM[activeTileIndex].nbTiles[g]].isMonastery())
+                   { 
+                    
+                        // Floor can either increment floortype up or down
+                        tM[tM[activeTileIndex].nbTiles[g]].floorType += areaEffectImpact;
+                        tM[tM[activeTileIndex].nbTiles[g]].updateColour();
+                  }
+                }
+
+                // Do the tiles two above, two left, two right, two below
+                int upperTile = tM[activeTileIndex].nbTiles[1];
+                tM[tM[upperTile].nbTiles[1]].floorType += areaEffectImpact;
+                tM[tM[upperTile].nbTiles[1]].updateColour();
+
+                int leftTile = tM[activeTileIndex].nbTiles[3];
+                tM[tM[leftTile].nbTiles[3]].floorType += areaEffectImpact;
+                tM[tM[leftTile].nbTiles[3]].updateColour();
+
+                int rightTile = tM[activeTileIndex].nbTiles[4];
+                tM[tM[rightTile].nbTiles[4]].floorType += areaEffectImpact;
+                tM[tM[rightTile].nbTiles[4]].updateColour();
+
+                int lowerTile = tM[activeTileIndex].nbTiles[6];
+                tM[tM[lowerTile].nbTiles[6]].floorType += areaEffectImpact;
+                tM[tM[lowerTile].nbTiles[6]].updateColour();
+
+
+            }
+
+            this.GetComponent<LogManager>().logMessage("You drop the thing");
+
+
+        } else if (areaEffectType == 1)
+        {
+
+        }
 
     }
 
@@ -526,7 +658,6 @@ public class BoardManager : MonoBehaviour {
         Vector3 randomPosition = gridPositions[randomIndex];
         gridPositions.RemoveAt(randomIndex);
         return randomPosition;
-
     }
 
     void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum)
@@ -538,7 +669,6 @@ public class BoardManager : MonoBehaviour {
             Vector3 randomPosition = RandomPosition();
             GameObject tileChoice = tileArray[Random.Range(0, tileArray.Length)];
             Instantiate(tileChoice, randomPosition, Quaternion.identity);
-
         }
     }
 
@@ -548,13 +678,10 @@ public class BoardManager : MonoBehaviour {
 
         BoardSetup();
         InitialiseList();
-
         LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
         LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
         int enemyCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 enemies, level 8, etc.
         LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
         Instantiate(exit, new Vector3(columns - 1, rows - 1, 0f), Quaternion.identity);
-
     }
-
 }
