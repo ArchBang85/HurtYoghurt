@@ -41,13 +41,13 @@ public class LogManager : MonoBehaviour
         {
             Debug.Log(s);
         }
-        logMessage("Hello there, the yoghurt burps ");
+       
         foreach (string s in activeLogMessages)
         {
             Debug.Log(s);
         }
 
-        logMessage("TESTING A REALLY LONG MESSAGE OF MANY LETTERS IT SHOULD BE FINE");
+        logMessage("The yoghurt blurps with horrendous vim.");
    
         
     }

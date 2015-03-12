@@ -8,15 +8,17 @@ using Random = UnityEngine.Random; // Need to specify because there's an overlap
 public class BoardManager : MonoBehaviour {
 
     public GameObject testWall;
-    public GameObject yoghurt;
+    //public GameObject yoghurt;
+    public GameObject yoghurtHolder;
+    public GameObject[] yoghurtTypes = new GameObject[5];
     public LayerMask blockingLayer;
     public GameObject playerObject;
     public bool innerWalls = false;
-
+    private bool yoghurtStart = true;
     void Awake()
     {
         playerObject = GameObject.Find("Player");
-        
+        yoghurtHolder = GameObject.Find("YoghurtHolder");
     }
 
     void Start()
@@ -66,7 +68,7 @@ public class BoardManager : MonoBehaviour {
         private int floorTypeMax = 4;
 
         public int yoghurtLevel = 0;
-        private int yoghurtLevelMax = 4;
+        private int yoghurtLevelMax = 5;
 
         public bool grownThisTurn = false;
 
@@ -108,30 +110,67 @@ public class BoardManager : MonoBehaviour {
             }
             }
        
-        public void updateYoghurt()
+        public void updateYoghurt(GameObject[] yogTypes, GameObject yoghurtHolder)
         {
-            if (yoghurtLevel > 4) yoghurtLevel = 4;
+            if (yoghurtLevel > 5) yoghurtLevel = 5;
             if (yoghurtLevel < 0) yoghurtLevel = 0;
 
-            if(yoghurtLevel == 0)
+            if(yoghurtLevel == 1)
             {
                 // basic yoghurt level, one splodge
-            } else if (yoghurtLevel == 1)
-            {
-                // two splodges
+                if(myYoghurt == null)
+                { 
+                    GameObject yogInstance = Instantiate(yogTypes[0], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                    myYoghurt = yogInstance;
+                    //yogInstance.transform.SetParent(yoghurtHolder.transform);
+
+                }
             } else if (yoghurtLevel == 2)
             {
-                // three splodges
+                //if (grownThisTurn)
+                //{
+                    // remove previous splodge
+                    Destroy(myYoghurt);
+                    myYoghurt = null;
+                    // two splodges
+                   // Debug.Log("creating double splodge");
+                    GameObject yogInstance = Instantiate(yogTypes[1], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                    myYoghurt = yogInstance;
+                    //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
+                //}
             } else if (yoghurtLevel == 3)
             {
-                // Getting yoghurty!
-                // Movement will slow
+                // three splodges
+                // remove previous splodge
+                Destroy(myYoghurt);
+                myYoghurt = null;
+                // two splodges
+              //  Debug.Log("creating triple splodge");
+                GameObject yogInstance = Instantiate(yogTypes[2], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                myYoghurt = yogInstance;
+                //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
             } else if (yoghurtLevel == 4)
             {
+                // Getting yoghurty!
+                // Movement will slow
+                Destroy(myYoghurt);
+                myYoghurt = null;
+                // two splodges
+              //  Debug.Log("creating triple splodge");
+                GameObject yogInstance = Instantiate(yogTypes[3], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                myYoghurt = yogInstance;
+            } else if (yoghurtLevel == 5)
+            {
                 // MAXIMUM YOGHURT
                 // full sprite, can no longer travel
+                Destroy(myYoghurt);
+                myYoghurt = null;
+                // two splodges
+              //  Debug.Log("creating maximum splodge");
+                GameObject yogInstance = Instantiate(yogTypes[4], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                myYoghurt = yogInstance;
             }
 
         }
@@ -196,42 +235,8 @@ public class BoardManager : MonoBehaviour {
             return monasteryWall;
         }
 
-        public void yoghurtGrow(List<TileData> tM, GameObject yoghurt)
-        {
-            // Remember to also learn how to remove this
-            if(myYoghurt != null)
-            {
-                // Get randomised cardinal directions
-                int r = Random.Range(1, 5);
-                if (r == 2)
-                    r = 6;
-               
-                int targetTile = nbTiles[r];
-
-                // Catch cases where tile doesn't exist
-                if (targetTile != -1)
-                {
-                    // Make sure yoghurt doesn't exist on tile already and isn't growing on a wall
-                    if (tM[targetTile].myYoghurt == null && !tM[targetTile].isMonasteryWall())
-                    {
-                        // Make sure can't grow more than once a turn
-                        if (!grownThisTurn)
-                        {
-                            // Different growth processes
-
-
-                            tM[targetTile].myYoghurt = Instantiate(yoghurt, new Vector3(tM[targetTile].x, tM[targetTile].y, 0), Quaternion.identity) as GameObject;
-                            tM[targetTile].yoghurtLevel += 1;
-                            tM[targetTile].updateYoghurt();
-                            
-                            
-                            
-                            tM[targetTile].grownThisTurn = true;
-                        }
-                    }
-                }
-            }
-        }
+       
+        
 
 
         // helper method
@@ -380,8 +385,11 @@ public class BoardManager : MonoBehaviour {
                                     instance.transform.SetParent(boardHolder);
                                     tileMaster[counter].hasTile = true;
                                     tileMaster[counter].myFloor = instance;
+                                    // make a little transparent
+                                    instance.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
+
                                 }
-                        }
+                            }
                         }
                     }
                     counter += 1;
@@ -537,8 +545,60 @@ public class BoardManager : MonoBehaviour {
 
 
 
-        yoghurtBehaviour();
+       // yoghurtBehaviour();
     }
+
+    // Growing an individual yoghurt
+    public void yoghurtGrow(int tileIndex)
+        {
+            // Remember to also learn how to remove this
+            if(tileMaster[tileIndex].myYoghurt != null && !tileMaster[tileIndex].grownThisTurn)
+            {  
+                // Get randomised cardinal directions
+                int r = Random.Range(1, 5);
+                if (r == 2)
+                    r = 6;
+               
+                int targetTile = tileMaster[tileIndex].nbTiles[r];
+
+                // Catch cases where tile doesn't exist
+                if (targetTile != -1)
+                {
+                    // isn't growing on a wall
+                    if (!tileMaster[targetTile].isMonasteryWall())
+                    {
+                        // Make sure yoghurt doesn't exist on tile already
+                        if (tileMaster[targetTile].myYoghurt == null)
+                        {
+                            // Make sure can't grow more than once a turn
+                            if (!tileMaster[targetTile].grownThisTurn)
+                            {
+                                // Different growth processes
+
+                                //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                tileMaster[targetTile].yoghurtLevel += 1;
+                                tileMaster[targetTile].grownThisTurn = true;
+                                tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                            }
+                        }
+                        else
+                        // pre-existing yoghurt
+                        {
+                            // yoghurt is beyond level 1
+                            if (!tileMaster[targetTile].grownThisTurn)
+                            {
+                                // Different growth processes
+
+                                //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                tileMaster[targetTile].yoghurtLevel += 1;
+                                tileMaster[targetTile].grownThisTurn = true;
+                                tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
     void yoghurtBehaviour()
     {
@@ -549,14 +609,15 @@ public class BoardManager : MonoBehaviour {
             tileMaster[i].grownThisTurn = false;    
         }
 
-        tileMaster[444].myYoghurt = Instantiate(yoghurt, new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
-        
+        // set initial yoghurt, do only once
+        if (yoghurtStart)
+        {
+            tileMaster[444].myYoghurt = Instantiate(yoghurtTypes[0], new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
+            yoghurtStart = false;
+        }
         for (int i = 0; i < tileMaster.Count; i++)
         {
-            if(tileMaster[i].myYoghurt != null)
-            {
-                tileMaster[i].yoghurtGrow(tileMaster, yoghurt);
-            }
+                yoghurtGrow(i);
         }
     }
 
