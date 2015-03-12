@@ -11,6 +11,12 @@ public class BoardManager : MonoBehaviour {
     public GameObject yoghurt;
     public LayerMask blockingLayer;
     public bool innerWalls = false;
+
+
+    void Awake()
+    {
+
+    }
     [Serializable]
     public class Count
     {
@@ -35,7 +41,7 @@ public class BoardManager : MonoBehaviour {
 
     public class TileData
     {
-        
+        public bool hasTile = false;
         int index {get; set;}
         public int x { get; set; }
         public int y { get; set; }
@@ -183,6 +189,7 @@ public class BoardManager : MonoBehaviour {
     public Count foodCount = new Count(1, 3);
     public GameObject exit;
     public GameObject[] floorTiles;
+    public GameObject[] outFloorTiles;
     public GameObject[] wallTiles;
     public GameObject[] foodTiles;
     public GameObject[] enemyTiles;
@@ -230,10 +237,9 @@ public class BoardManager : MonoBehaviour {
                 for (int y = 0; y < rows+1; y++)
                 {
                     tileMaster.Add(new TileData(counter, x, y));
-                 
-                 
-                        GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
-                    
+             
+                    GameObject toInstantiate = null;
+         
                     // outer limits get outermost tiles
                     //if (x == -1 || x == columns || y == -1 || y == rows)
                     //{
@@ -247,9 +253,8 @@ public class BoardManager : MonoBehaviour {
                         }
                         else
                         {
-                            GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
-
-                            instance.transform.SetParent(boardHolder);
+                     
+                  
                       
                  
 
@@ -258,7 +263,7 @@ public class BoardManager : MonoBehaviour {
                         foreach (GameObject piscesSphere in pisces)
                         {           
                             RaycastHit hit;
-                            if (Physics.Raycast(instance.transform.position, -Vector3.forward, out hit))
+                            if (Physics.Raycast(new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0), -Vector3.forward, out hit))
                             {
                                 // What to do if in bounds
                                 //Component[] s = instance.transform.GetComponents<MyTileObject>();
@@ -266,8 +271,49 @@ public class BoardManager : MonoBehaviour {
                                 //{
                                     //com.GetComponent<MyTileObject>().inMonastery = true;
                                     tileMaster[counter].setIsMonastery(true);
-                                //}
+                                    if (tileMaster[counter].hasTile == false)
+                                    {
+                                        toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
+                                        GameObject instance = Instantiate(toInstantiate, new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0f), Quaternion.identity) as GameObject;
+                                        instance.transform.SetParent(boardHolder);
+
+                                        int colorChoice = Random.Range(0, 5);
+                                        if(colorChoice == 0)
+                                        {
+
+                                        } else if (colorChoice == 1)
+                                        {
+                                            // green
+                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
+                                        } else if (colorChoice == 2)
+                                        {
+                                            // cyan
+                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
+                                        } else if (colorChoice == 3)
+                                        {
+                                            // ochre
+                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
+                                        } else if (colorChoice == 4)
+                                        {
+                                            // yellow
+                                            instance.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
+                                        }
+
+                                        
+                                        tileMaster[counter].hasTile = true;
+                                    }
+
                             }
+                            else
+                            {
+                                if (tileMaster[counter].hasTile == false)
+                                {
+                                    toInstantiate = outFloorTiles[Random.Range(0, outFloorTiles.Length)];
+                                    GameObject instance = Instantiate(toInstantiate, new Vector3(tileMaster[counter].x, tileMaster[counter].y, 0f), Quaternion.identity) as GameObject;
+                                    instance.transform.SetParent(boardHolder);
+                                    tileMaster[counter].hasTile = true; 
+                                }
+                        }
                         }
                     }
                     counter += 1;
@@ -364,6 +410,7 @@ public class BoardManager : MonoBehaviour {
                 else
                 {
                     GameObject instance =  Instantiate(testWall, new Vector3(tileMaster[c].x, tileMaster[c].y, 0), Quaternion.identity) as GameObject;
+    
                     instance.transform.SetParent(boardHolder);
                     tileMaster[c].setMonasteryWall(true);
                     

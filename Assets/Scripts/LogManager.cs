@@ -11,13 +11,26 @@ public class LogManager : MonoBehaviour
     public List<string> logMessages;
     private string[] activeLogMessages = new string[5];
     public GameObject[] activeLogMessageStrips = new GameObject[5];
+    public GameObject auxCanvas;
     public GameObject auxiliaryLog; // What to display as an overlay when zoomed in 
+    public GameObject auxiliaryLog2; // What to display as an overlay when zoomed in 
+    public bool zoomedIn = false;
+    private int counter = 1;
 
     // Use this for initialization
     void Start()
     {
         scrollLog = GameObject.Find("ScrollLog");
+        auxCanvas = GameObject.Find("AuxCanvas");
         auxiliaryLog = GameObject.Find("AuxLogText1");
+        auxiliaryLog2 = GameObject.Find("AuxLogText2");
+        activeLogMessageStrips[0] = GameObject.Find("LogText1");
+        activeLogMessageStrips[1] = GameObject.Find("LogText2");
+        activeLogMessageStrips[2] = GameObject.Find("LogText3");
+        activeLogMessageStrips[3] = GameObject.Find("LogText4");
+        activeLogMessageStrips[4] = GameObject.Find("LogText5");
+
+        auxCanvas.SetActive(false);
 
         logMessages.Clear();
         for (int v = 0; v < 5; v++)
@@ -33,6 +46,8 @@ public class LogManager : MonoBehaviour
         {
             Debug.Log(s);
         }
+
+        logMessage("TESTING A REALLY LONG MESSAGE OF MANY LETTERS IT SHOULD BE FINE");
    
         
     }
@@ -41,9 +56,11 @@ public class LogManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            scrollLog.transform.Rotate(-Vector3.right, 250 * Time.deltaTime, Space.World);
+            scrollLog.transform.Rotate(-Vector3.right, 400 * Time.deltaTime, Space.World);
+            logMessage("test message " + counter);
+            counter += 1;
         }
 
     }
@@ -59,19 +76,25 @@ public class LogManager : MonoBehaviour
         
         // Establish length of log
         // 
-        int maxLineLength = 26;
+        int maxLineLength = 39;
         bool multiLine = false;
         if(s.Length > maxLineLength)
         {
             // need to split across multiple lines
             multiLine = true;
-            for (int i = 0; i < s.Length; i++)
+            if (multiLine)
             {
-                if(i % maxLineLength == 0)
+
+                for (int i = 0; i < s.Length; i++)
                 {
-                    s1 = s.Substring(0, maxLineLength);
-                    s2 = s.Substring(maxLineLength + 1, s.Length);
+                    if(i % maxLineLength == 0)
+                    {
+                        s1 = s.Substring(0, maxLineLength);
+                        s2 = s.Substring(maxLineLength, s.Length -maxLineLength);
+                   
+                    }
                 }
+
             }
         }
 
@@ -79,23 +102,50 @@ public class LogManager : MonoBehaviour
         scrollLog.transform.Rotate(-Vector3.right, 250 * Time.deltaTime, Space.World);
         
         // update active messages 
-
-        for (int i = 4; i > 0; i--)
+        if(multiLine)
         {
-            activeLogMessages[i] = activeLogMessages[i - 1];
-        }
+            activeLogMessages[4] = activeLogMessages[2];
+            activeLogMessages[3] = activeLogMessages[1];
+            activeLogMessages[2] = activeLogMessages[0];
 
-        activeLogMessages[0] = s;
-
-        // Update auxiliary log
-        if (s1 != null)
-        {
-            auxiliaryLog.GetComponent<Text>().text = s1;
+            activeLogMessages[0] = s1;
+            activeLogMessages[1] = s2;
         }
         else
         {
-            auxiliaryLog.GetComponent<Text>().text = s;
+            for (int i = 4; i > 0; i--)
+            {
+                activeLogMessages[i] = activeLogMessages[i - 1];
+            }
+
+            activeLogMessages[0] = s;
+
         }
-            //optionChosen.GetComponent<Text>()
+
+        // Actually update the texts
+        for (int t = 0; t < activeLogMessages.Length; t++)
+        {
+            activeLogMessageStrips[t].GetComponent<Text>().text = activeLogMessages[t];
+        }
+
+        
+        // Update auxiliary log
+       // if (zoomedIn)
+       // {
+
+
+            if (s1 != null)
+            {
+                // Remember that Text accessing requires UnityEngine.UI
+                auxiliaryLog.GetComponent<Text>().text = s1;
+                auxiliaryLog2.GetComponent<Text>().text = s2;
+            }
+            else
+            {
+                auxiliaryLog2.GetComponent<Text>().text = s;
+                auxiliaryLog.GetComponent<Text>().text = "";    
+            }
+        //}
+
     }
 }
