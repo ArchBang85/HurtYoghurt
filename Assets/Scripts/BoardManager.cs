@@ -15,6 +15,8 @@ public class BoardManager : MonoBehaviour {
     public GameObject playerObject;
     public bool innerWalls = false;
     private bool yoghurtStart = true;
+    public GameObject[] particleEffects = new GameObject[3];
+
     void Awake()
     {
         playerObject = GameObject.Find("Player");
@@ -44,7 +46,15 @@ public class BoardManager : MonoBehaviour {
         {
             yoghurtBehaviour();
         }
-        if(Input.GetKeyDown(KeyCode.F))
+
+        // Acididc
+        if(Input.GetKeyDown(KeyCode.O))
+        {
+            areaEffect(0, 1, 600, tileMaster, -1);
+        }
+
+
+        if(Input.GetKeyDown(KeyCode.P))
         {
             areaEffect(0, 1, 600, tileMaster, 1);
         }
@@ -77,36 +87,38 @@ public class BoardManager : MonoBehaviour {
             // Allow yoghurtlevel to loop around 
             if(floorType > floorTypeMax)
             {
-                floorType = 0;
+                floorType = floorTypeMax;
             } else if (floorType < 0)
             {
-                floorType = floorTypeMax;
+                floorType = 0;
             }
 
             if (floorType == 0)
             {
-                // standard
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
-            }
-            else if (floorType == 1)
-            {
                 // green
                 myFloor.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
             }
-            else if (floorType == 2)
+            else if (floorType == 1)
             {
                 // cyan
                 myFloor.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
+                
+            }
+            else if (floorType == 2)
+            {
+                // standard basic floor
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
             }
             else if (floorType == 3)
             {
-                // ochre
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
+                // yellow
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
             }
             else if (floorType == 4)
             {
-                // yellow
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
+      
+                // ochre
+                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
             }
             }
        
@@ -134,7 +146,11 @@ public class BoardManager : MonoBehaviour {
 
             // What happens should depend on floor type
             
-
+            if(yoghurtLevel == 0)
+            {
+                Destroy(myYoghurt);
+                myYoghurt = null;
+            }
 
             if(yoghurtLevel == 1)
             {
@@ -211,11 +227,8 @@ public class BoardManager : MonoBehaviour {
                 myYoghurt = null;
                 // two splodges
               //  Debug.Log("creating maximum splodge");
-                int rotationAmount = 90;
-                if (Random.Range(0, 2) < 1)
-                {
-                    rotationAmount = 45;
-                } 
+ 
+
                 GameObject yogInstance = Instantiate(yogTypes[4], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
                 myYoghurt = yogInstance;
                 if (Random.Range(0, 10) < 5)
@@ -416,6 +429,8 @@ public class BoardManager : MonoBehaviour {
                                     instance.transform.SetParent(boardHolder);                                        
                                     tileMaster[counter].hasTile = true;
                                     tileMaster[counter].myFloor = instance;   
+                                    
+                                    // Create basic floor type
                                     tileMaster[counter].floorType = 2;
                                     
                                     tileMaster[counter].updateColour();
@@ -602,49 +617,101 @@ public class BoardManager : MonoBehaviour {
             // Remember to also learn how to remove this
             if(tileMaster[tileIndex].myYoghurt != null && !tileMaster[tileIndex].grownThisTurn)
             {  
-                // Get randomised cardinal directions
-                int r = Random.Range(1, 5);
-                if (r == 2)
-                    r = 6;
-               
-                int targetTile = tileMaster[tileIndex].nbTiles[r];
 
-                // Catch cases where tile doesn't exist
-                if (targetTile != -1)
+
+               // Growth depends on tile type
+
+                // Type 0 growth: Very Acidic
+
+                // Type 1 growth: Acidic
+
+                if (tileMaster[tileIndex].floorType == 1)
                 {
-                    // isn't growing on a wall
-                    if (!tileMaster[targetTile].isMonasteryWall())
+                    // If the tile is full of yoghurt it will blow
+
+                    if(tileMaster[tileIndex].yoghurtLevel == 5)
                     {
-                        // Make sure yoghurt doesn't exist on tile already
-                        if (tileMaster[targetTile].myYoghurt == null)
+                        tileMaster[tileIndex].yoghurtLevel = 0;
+                        tileMaster[tileIndex].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                        tileMaster[tileIndex].floorType += 1;
+                        tileMaster[tileIndex].updateColour();
+                        // Wipeout nearby yoghurt
+                        for (int n = 0; n < 8; n++)
                         {
-                            // Make sure can't grow more than once a turn
-                            if (!tileMaster[targetTile].grownThisTurn)
-                            {
-                                // Different growth processes
+                            tileMaster[tileMaster[tileIndex].nbTiles[n]].yoghurtLevel = 0;
+                            tileMaster[tileMaster[tileIndex].nbTiles[n]].updateYoghurt(yoghurtTypes, yoghurtHolder);
 
-                                //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
-                                tileMaster[targetTile].yoghurtLevel += 1;
-                                tileMaster[targetTile].grownThisTurn = true;
-                                tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
-                            }
+                            // Revert tile back towards basic
+                            //tileMaster[tileMaster[tileIndex].nbTiles[n]].floorType += 1;
+
+
                         }
-                        else
-                        // pre-existing yoghurt
-                        {
-                            // yoghurt is beyond level 1
-                            if (!tileMaster[targetTile].grownThisTurn)
-                            {
-                                // Different growth processes
 
-                                //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
-                                tileMaster[targetTile].yoghurtLevel += 1;
-                                tileMaster[targetTile].grownThisTurn = true;
-                                tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+
+
+                        // Create explosion effect
+                        Instantiate(particleEffects[0], new Vector3(tileMaster[tileIndex].x, tileMaster[tileIndex].y, 0), Quaternion.identity);
+                        Instantiate(particleEffects[1], new Vector3(tileMaster[tileIndex].x, tileMaster[tileIndex].y, 0), Quaternion.identity);
+
+                    }
+
+
+                }
+                // Type 2 growth: Basic = random one per tile
+
+                if (tileMaster[tileIndex].floorType == 2)
+                {
+                
+                    // Get randomised cardinal directions
+                    int r = Random.Range(1, 5);
+                    if (r == 2)
+                        r = 6;
+
+                    int targetTile = tileMaster[tileIndex].nbTiles[r];
+
+                    // Catch cases where tile doesn't exist
+                    if (targetTile != -1)
+                    {
+                        // isn't growing on a wall
+                        if (!tileMaster[targetTile].isMonasteryWall())
+                        {
+                            // Make sure yoghurt doesn't exist on tile already
+                            if (tileMaster[targetTile].myYoghurt == null)
+                            {
+                                // Make sure can't grow more than once a turn
+                                if (!tileMaster[targetTile].grownThisTurn)
+                                {
+                                    // Different growth processes
+
+                                    //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                    tileMaster[targetTile].yoghurtLevel += 1;
+                                    tileMaster[targetTile].grownThisTurn = true;
+                                    tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                }
+                            }
+                            else
+                            // pre-existing yoghurt
+                            {
+                               
+                                // yoghurt is beyond level 1
+                                if (!tileMaster[targetTile].grownThisTurn)
+                                {
+                                    // Different growth processes
+
+                                    //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                    tileMaster[targetTile].yoghurtLevel += 1;
+                                    tileMaster[targetTile].grownThisTurn = true;
+                                    tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                }
                             }
                         }
                     }
                 }
+
+                // Type 3 growth: Alkaline
+
+                // Type 4 growth: Very Alkaline
+
             }
         }
 
@@ -660,9 +727,12 @@ public class BoardManager : MonoBehaviour {
         // set initial yoghurt, do only once
         if (yoghurtStart)
         {
+            // Should be randomised and depend on level
             tileMaster[444].myYoghurt = Instantiate(yoghurtTypes[0], new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
             yoghurtStart = false;
         }
+
+        // Go through each tile once and calculate yoghurt behaviour
         for (int i = 0; i < tileMaster.Count; i++)
         {
                 yoghurtGrow(i);
