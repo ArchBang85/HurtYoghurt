@@ -81,6 +81,8 @@ public class BoardManager : MonoBehaviour {
         private int yoghurtLevelMax = 5;
 
         public bool grownThisTurn = false;
+        public int growthTimer = 1;
+        public int growthTimerReset = 1;     
 
         public void updateColour()
         {
@@ -138,104 +140,124 @@ public class BoardManager : MonoBehaviour {
 
         }
 
+        public void yoghurtIncrement()
+        {
+            if(growthTimer < 0)
+            {
+                yoghurtLevel += 1;
+                growthTimer = growthTimerReset;
+            }
+            growthTimer -= 1;
+
+
+        }
         public void updateYoghurt(GameObject[] yogTypes, GameObject yoghurtHolder)
         {
             if (yoghurtLevel > 5) yoghurtLevel = 5;
             if (yoghurtLevel < 0) yoghurtLevel = 0;
 
-
-            // What happens should depend on floor type
-            
-            if(yoghurtLevel == 0)
-            {
-                Destroy(myYoghurt);
-                myYoghurt = null;
-            }
-
-            if(yoghurtLevel == 1)
-            {
-                // basic yoghurt level, one splodge
-                if(myYoghurt == null)
-                {
-             
-                    // find out about rotation opportunities 
-                    GameObject yogInstance = Instantiate(yogTypes[0], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
-              
-                    myYoghurt = yogInstance;
   
-                    if (Random.Range(0, 10) < 5)
-                    {
-                        spinObject(yogInstance);
-                    }
-                    //yogInstance.transform.SetParent(yoghurtHolder.transform);
-
+                // What happens should depend on floor type
+            
+                if(yoghurtLevel == 0)
+                {
+                    Destroy(myYoghurt);
+                    myYoghurt = null;
                 }
-            } else if (yoghurtLevel == 2)
-            {
-                // remove previous splodge
+
+                if(yoghurtLevel == 1)
+                {
+                    // basic yoghurt level, one splodge
+                    if(myYoghurt == null)
+                    {
+             
+                        // find out about rotation opportunities 
+                        GameObject yogInstance = Instantiate(yogTypes[0], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+              
+                        myYoghurt = yogInstance;
+                        myYoghurt.layer = LayerMask.NameToLayer("Default");
+  
+                        if (Random.Range(0, 10) < 5)
+                        {
+                            spinObject(yogInstance);
+                        }
+                        //yogInstance.transform.SetParent(yoghurtHolder.transform);
+
+                    }
+                } else if (yoghurtLevel == 2)
+                {
+                    // remove previous splodge
+                        Destroy(myYoghurt);
+                        myYoghurt = null;
+                        // two splodges
+                       // Debug.Log("creating double splodge");
+                        GameObject yogInstance = Instantiate(yogTypes[1], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+        
+                
+                        myYoghurt = yogInstance;
+                        myYoghurt.layer = LayerMask.NameToLayer("Default");
+
+                        if (Random.Range(0, 10) < 5)
+                        {
+                            spinObject(yogInstance);
+                        }
+                        //yogInstance.transform.SetParent(yoghurtHolder.transform);
+
+                    //}
+                } else if (yoghurtLevel == 3)
+                {
+                    // three splodges
+                    // remove previous splodge
                     Destroy(myYoghurt);
                     myYoghurt = null;
                     // two splodges
-                   // Debug.Log("creating double splodge");
-                    GameObject yogInstance = Instantiate(yogTypes[1], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
-        
-                
+                  //  Debug.Log("creating triple splodge");
+                    GameObject yogInstance = Instantiate(yogTypes[2], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
                     myYoghurt = yogInstance;
-
+                    myYoghurt.layer = LayerMask.NameToLayer("Default"); 
                     if (Random.Range(0, 10) < 5)
                     {
                         spinObject(yogInstance);
                     }
                     //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
-                //}
-            } else if (yoghurtLevel == 3)
-            {
-                // three splodges
-                // remove previous splodge
-                Destroy(myYoghurt);
-                myYoghurt = null;
-                // two splodges
-              //  Debug.Log("creating triple splodge");
-                GameObject yogInstance = Instantiate(yogTypes[2], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
-                myYoghurt = yogInstance;
-                if (Random.Range(0, 10) < 5)
+                } else if (yoghurtLevel == 4)
                 {
-                    spinObject(yogInstance);
-                }
-                //yogInstance.transform.SetParent(yoghurtHolder.transform);
+                    // Getting yoghurty!
+                    // Movement will slow
+                    Destroy(myYoghurt);
+                    myYoghurt = null;
+                    // two splodges
+                  //  Debug.Log("creating triple splodge");
+                    GameObject yogInstance = Instantiate(yogTypes[3], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                    myYoghurt = yogInstance;
+                    myYoghurt.layer = LayerMask.NameToLayer("Default");
+                    if (Random.Range(0, 10) < 5)
+                    {
+                        spinObject(yogInstance);
+                    }
+                } else if (yoghurtLevel == 5)
+                {
+                    // MAXIMUM YOGHURT
+                    // full sprite, can no longer travel
+                    Destroy(myYoghurt);
+                    myYoghurt = null;
+                    // two splodges
+                  //  Debug.Log("creating maximum splodge");
+                    // Make impassable
+               
 
-            } else if (yoghurtLevel == 4)
-            {
-                // Getting yoghurty!
-                // Movement will slow
-                Destroy(myYoghurt);
-                myYoghurt = null;
-                // two splodges
-              //  Debug.Log("creating triple splodge");
-                GameObject yogInstance = Instantiate(yogTypes[3], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
-                myYoghurt = yogInstance;
-                if (Random.Range(0, 10) < 5)
-                {
-                    spinObject(yogInstance);
-                }
-            } else if (yoghurtLevel == 5)
-            {
-                // MAXIMUM YOGHURT
-                // full sprite, can no longer travel
-                Destroy(myYoghurt);
-                myYoghurt = null;
-                // two splodges
-              //  Debug.Log("creating maximum splodge");
- 
 
-                GameObject yogInstance = Instantiate(yogTypes[4], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
-                myYoghurt = yogInstance;
-                if (Random.Range(0, 10) < 5)
-                {
-                    spinObject(yogInstance);
+                    GameObject yogInstance = Instantiate(yogTypes[4], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
+                    myYoghurt = yogInstance;
+                    myYoghurt.layer = LayerMask.NameToLayer("BlockingLayer");
+                    if (Random.Range(0, 10) < 5)
+                    {
+                        spinObject(yogInstance);
+                    }
                 }
-            }
+            
+           
  
 
         }
@@ -641,20 +663,27 @@ public class BoardManager : MonoBehaviour {
                             tileMaster[tileMaster[tileIndex].nbTiles[n]].yoghurtLevel = 0;
                             tileMaster[tileMaster[tileIndex].nbTiles[n]].updateYoghurt(yoghurtTypes, yoghurtHolder);
 
-                            // Revert tile back towards basic
-                            //tileMaster[tileMaster[tileIndex].nbTiles[n]].floorType += 1;
-
-
                         }
 
+                        // Have a chance of spreading yoghurt in tiles beyond the near ones
+                        for (int n = 0; n < 8; n++)
+                        {
+                            int tTile = tileMaster[tileIndex].nbTiles[n];
+                            int targetTileTwoRemoved = tileMaster[tTile].nbTiles[n];
+                            if(tileMaster[targetTileTwoRemoved].isMonastery() && !tileMaster[targetTileTwoRemoved].isMonasteryWall())
+                            {
+                                if (Random.Range(0, 10) < 2)
+                                {
+                                    tileMaster[targetTileTwoRemoved].yoghurtIncrement();
+                                    tileMaster[targetTileTwoRemoved].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                }
+                            }
 
-
-                        // Create explosion effect
-                        Instantiate(particleEffects[0], new Vector3(tileMaster[tileIndex].x, tileMaster[tileIndex].y, 0), Quaternion.identity);
-                        Instantiate(particleEffects[1], new Vector3(tileMaster[tileIndex].x, tileMaster[tileIndex].y, 0), Quaternion.identity);
-
+                        }
+                            // Create explosion effect
+                            Instantiate(particleEffects[0], new Vector3(tileMaster[tileIndex].x, tileMaster[tileIndex].y, 0), Quaternion.identity);
+                            Instantiate(particleEffects[1], new Vector3(tileMaster[tileIndex].x, tileMaster[tileIndex].y, 0), Quaternion.identity);
                     }
-
 
                 }
                 // Type 2 growth: Basic = random one per tile
@@ -684,7 +713,7 @@ public class BoardManager : MonoBehaviour {
                                     // Different growth processes
 
                                     //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
-                                    tileMaster[targetTile].yoghurtLevel += 1;
+                                    tileMaster[targetTile].yoghurtIncrement();
                                     tileMaster[targetTile].grownThisTurn = true;
                                     tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
                                 }
@@ -699,7 +728,7 @@ public class BoardManager : MonoBehaviour {
                                     // Different growth processes
 
                                     //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
-                                    tileMaster[targetTile].yoghurtLevel += 1;
+                                    tileMaster[targetTile].yoghurtIncrement();
                                     tileMaster[targetTile].grownThisTurn = true;
                                     tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
                                 }
@@ -826,6 +855,25 @@ public class BoardManager : MonoBehaviour {
         {
             //
             //
+            return true;
+        }
+        return false;
+    }
+
+    bool checkSurrounded(int tileIndex)
+    {
+        // if fully surrounded, then dies
+        int counter = 0;
+        for (int t = 0; t < 8; t++)
+        {
+            if(tileMaster[tileMaster[tileIndex].nbTiles[t]].yoghurtLevel == 5)
+            {
+                counter += 1;
+            }
+        }
+
+        if (counter == 8)
+        {
             return true;
         }
         return false;
