@@ -20,7 +20,18 @@ public class VesicaPisces : MonoBehaviour {
      
     // Use this for initialization
 	public void setupPisces () {
-        piscesParts = new GameObject("piscesHolder").transform;
+        if (piscesParts == null)
+        {
+            if (GameObject.Find("piscesHolder") == null)
+            {
+                piscesParts = new GameObject("piscesHolder").transform;
+            }
+            else
+            {
+                piscesParts = GameObject.Find("piscesHolder").transform;
+            }
+        }
+        
         for (int y = 0; y < copies; y++)
         {
             for (int i = 0; i < stages; i++)

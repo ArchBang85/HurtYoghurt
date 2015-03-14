@@ -58,9 +58,8 @@ public class GameManager : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
         enemies = new List<Enemy>();
 
-        // Get a component ref to the attached script
-	    boardScript = GetComponent<BoardManager>();
-        piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
+
+        //doSetup = true;
 	    InitGame();
     }
 
@@ -103,10 +102,14 @@ public class GameManager : MonoBehaviour {
             rankOptions[0] = GameObject.Find("RankOption1");
             rankOptions[1] = GameObject.Find("RankOption2");
             rankOptions[2] = GameObject.Find("RankOption3");
-            readyButton = GameObject.Find("ReadyText");
+
+          
         }
 
-
+        readyButton = GameObject.Find("ReadyText");
+        // Get a component ref to the attached script
+        boardScript = GetComponent<BoardManager>();
+        piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
         // Clear out from last level
         enemies.Clear();
 
