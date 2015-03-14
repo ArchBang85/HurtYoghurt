@@ -57,13 +57,13 @@ public class BoardManager : MonoBehaviour {
         // Acididc
         if(Input.GetKeyDown(KeyCode.O))
         {
-            areaEffect(0, 1, 600, tileMaster, -1);
+            areaEffect(0, 1, 600, tileMaster, "Acid");
         }
 
 
         if(Input.GetKeyDown(KeyCode.P))
         {
-            areaEffect(0, 1, 600, tileMaster, 1);
+            areaEffect(0, 1, 600, tileMaster, "Alkali");
         }
 
     }
@@ -85,18 +85,71 @@ public class BoardManager : MonoBehaviour {
         public string description;
         public int floorType = 0;
         private int floorTypeMax = 4;
+        private string floorTypeName = "Basic";
 
         public int yoghurtLevel = 0;
         private int yoghurtLevelMax = 5;
 
         public bool grownThisTurn = false;
         public int growthTimer = 0;
-        public int growthTimerReset = 1;     
+        public int growthTimerReset = 1;
+
+        public void setFloorName(string name)
+        {
+            if (name == "Basic")
+            {
+                floorTypeName = "Basic";
+            }
+            if (name == "Acid" && floorTypeName == "Basic")
+            {
+                floorTypeName = "Acid";
+            }
+            if (name == "Alkali" && floorTypeName == "Basic")
+            {
+                floorTypeName = "Alkali";
+            }
+            if (name == "Acid" && floorTypeName == "Alkali")
+            {
+                floorTypeName = "Explosive";
+            }
+            if (name == "Alkali" && floorTypeName == "Acid")
+            {
+                floorTypeName = "Explosive";
+            }
+        }
+
 
         public void updateColour()
         {
             if (this.isMonasteryTile)
             {
+                // DISCRETE STYLE
+                // combining two will create third
+                if (floorTypeName == "Explosive")
+                {
+                    floorType = 0;
+
+                }
+
+                if (floorTypeName == "Basic")
+                {
+                    floorType = 2;
+                }
+
+                if (floorTypeName == "Acid")
+                {
+                    floorType = 1;
+                }
+
+                if (floorTypeName == "Alkali")
+                {
+                    floorType = 3;
+                }
+
+
+
+                // LOOPING STYLE
+
                 // Allow yoghurtlevel to loop around 
                 if (floorType > floorTypeMax)
                 {
@@ -107,14 +160,16 @@ public class BoardManager : MonoBehaviour {
                     floorType = 0;
                 }
 
+
+
                 if (floorType == 0)
                 {
-                    // green
+                    // green ACIDIC/EXPLOSIVE
                     myFloor.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
                 }
                 else if (floorType == 1)
                 {
-                    // cyan
+                    // cyan proto-acidic
                     myFloor.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
 
                 }
@@ -127,7 +182,7 @@ public class BoardManager : MonoBehaviour {
                 }
                 else if (floorType == 3)
                 {
-                    // yellow
+                    // yellow proto-acidic
                     myFloor.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
                 }
                 else if (floorType == 4)
@@ -839,7 +894,7 @@ public class BoardManager : MonoBehaviour {
 
                 // Type 1 growth: Acidic
 
-                if (tileMaster[tileIndex].floorType == 1)
+                if (tileMaster[tileIndex].floorType == 0)
                 {
                     // If the tile is full of yoghurt it will blow
 
@@ -960,7 +1015,7 @@ public class BoardManager : MonoBehaviour {
         }
     }
 
-    void areaEffect(int areaEffectType, int range, int tileIndex, List<TileData>tM,  int areaEffectImpact = -1)
+    void areaEffect(int areaEffectType, int range, int tileIndex, List<TileData>tM,  string areaEffectImpact = "Basic")
     {
         // Get player coordinates
         int x = (int)playerObject.transform.position.x;
@@ -985,7 +1040,7 @@ public class BoardManager : MonoBehaviour {
             if (range == 1)
             {
                 // Do own tile
-                tM[activeTileIndex].floorType += areaEffectImpact;
+                tM[activeTileIndex].setFloorName(areaEffectImpact);
                 tM[activeTileIndex].updateColour();
 
                 // Do immediately surrounding tiles
@@ -995,7 +1050,7 @@ public class BoardManager : MonoBehaviour {
                    { 
                     
                         // Floor can either increment floortype up or down
-                        tM[tM[activeTileIndex].nbTiles[g]].floorType += areaEffectImpact;
+                       tM[tM[activeTileIndex].nbTiles[g]].setFloorName(areaEffectImpact);
                         tM[tM[activeTileIndex].nbTiles[g]].updateColour();
                   }
                 }
@@ -1004,33 +1059,33 @@ public class BoardManager : MonoBehaviour {
                 int upperTile = tM[activeTileIndex].nbTiles[1];
                 // But block if monastery wall
                 if(!tM[upperTile].isMonasteryWall())
-                { 
-                    tM[tM[upperTile].nbTiles[1]].floorType += areaEffectImpact;
+                {
+                    tM[tM[upperTile].nbTiles[1]].setFloorName(areaEffectImpact);
                     tM[tM[upperTile].nbTiles[1]].updateColour();
                 }
                 int leftTile = tM[activeTileIndex].nbTiles[3];
                 if (!tM[leftTile].isMonasteryWall())
                 {
                   
-                    tM[tM[leftTile].nbTiles[3]].floorType += areaEffectImpact;
+                    tM[tM[leftTile].nbTiles[3]].setFloorName(areaEffectImpact);
                     tM[tM[leftTile].nbTiles[3]].updateColour();
                 }
                 int rightTile = tM[activeTileIndex].nbTiles[4];
                 if (!tM[rightTile].isMonasteryWall())
                 {
-                    tM[tM[rightTile].nbTiles[4]].floorType += areaEffectImpact;
+                    tM[tM[rightTile].nbTiles[4]].setFloorName(areaEffectImpact);
                     tM[tM[rightTile].nbTiles[4]].updateColour();
                 }
                 int lowerTile = tM[activeTileIndex].nbTiles[6];
                 if (!tM[lowerTile].isMonasteryWall())
-                {  
-                   
-                    tM[tM[lowerTile].nbTiles[6]].floorType += areaEffectImpact;
+                {
+
+                    tM[tM[lowerTile].nbTiles[6]].setFloorName(areaEffectImpact);
                     tM[tM[lowerTile].nbTiles[6]].updateColour();
                 }
             }
 
-            if (areaEffectImpact == 1)
+            if (areaEffectImpact == "Alkali")
             {
                 if(Random.Range(0,10)<5)
                 {
@@ -1042,7 +1097,7 @@ public class BoardManager : MonoBehaviour {
                     this.GetComponent<LogManager>().logMessage("You splash the lye around you.");
                 }
                 
-            } else if (areaEffectImpact == -1)
+            } else if (areaEffectImpact == "Acid")
             {
                 if (Random.Range(0, 10) < 5)
                 {
