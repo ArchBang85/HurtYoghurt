@@ -69,6 +69,7 @@ public class Player : MovingObject {
         if(Input.GetKeyDown(KeyCode.Keypad5) || Input.GetKeyDown(KeyCode.X))
         {
             GameManager.instance.playerTurn = false;
+            CheckIfGameOver();
         }
 
         // Take regular movement also from keypad
@@ -150,18 +151,16 @@ public class Player : MovingObject {
         } 
 
 
-        else if (other.tag == "Food")
+        else if (other.tag == "Potash")
         {
-
-            food += pointsPerFood;
-            foodText.text = "+" + pointsPerFood + " Food: "+ food;
+            BoardManager.potashCount += 1;
+            BoardManager.potashText.GetComponent<Text>().text = BoardManager.potashCount.ToString();
             other.gameObject.SetActive(false);
         }
-        else if (other.tag == "Soda")
+        else if (other.tag == "Acid")
         {
-            food += pointsPerSoda;
-            foodText.text = "+" + pointsPerSoda + " Food: " + food;
-
+            BoardManager.acidCount += 1;
+            BoardManager.acidText.GetComponent<Text>().text = BoardManager.acidCount.ToString();
             other.gameObject.SetActive(false);
         }
 
@@ -192,20 +191,12 @@ public class Player : MovingObject {
     }
     private void CheckIfGameOver()
     {
-        
-        //if()
-        //{
-            
+        Debug.Log("Checking for game over");
+        if (BoardManager.checkPlayerSurrounded(new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0)))
+        {
+            Debug.Log("game over");
+        }
 
-
-
-        //}
-        
-        
-        //if (food <= 0)
-
-
-            //GameManager.instance.GameOver();
     }
 
 

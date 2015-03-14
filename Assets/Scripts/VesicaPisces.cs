@@ -11,6 +11,13 @@ public class VesicaPisces : MonoBehaviour {
     public int copies = 1;
     private Transform piscesParts;
 
+    void start()
+    {
+
+
+    DontDestroyOnLoad(gameObject);
+    }
+     
     // Use this for initialization
 	public void setupPisces () {
         piscesParts = new GameObject("piscesHolder").transform;

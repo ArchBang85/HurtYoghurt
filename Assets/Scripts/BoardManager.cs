@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using Random = UnityEngine.Random; // Need to specify because there's an overlap between System and UnityEngine
 
 //namespace Completed;
@@ -17,6 +18,12 @@ public class BoardManager : MonoBehaviour {
     private bool yoghurtStart = true;
     public GameObject[] particleEffects = new GameObject[3];
     private int yogMax = 5;
+    public int acidCount = 5;
+    public int potashCount = 5;
+    public GameObject acidText;
+    public GameObject potashText;
+    public GameObject acidObject;
+    public GameObject potashObject;
 
     void Awake()
     {
@@ -26,7 +33,12 @@ public class BoardManager : MonoBehaviour {
 
     void Start()
     {
-       
+        acidText = GameObject.Find("AcidCounter");
+        potashText = GameObject.Find("PotashCounter");
+
+        acidText.GetComponent<Text>().text = acidCount.ToString();
+        potashText.GetComponent<Text>().text = potashCount.ToString();
+
     }
     [Serializable]
     public class Count
@@ -57,13 +69,25 @@ public class BoardManager : MonoBehaviour {
         // Acididc
         if(Input.GetKeyDown(KeyCode.O))
         {
-            areaEffect(0, 1, 600, tileMaster, "Acid");
+            // If there's acid left
+            if(acidCount > 0)
+            {
+                areaEffect(0, 1, 600, tileMaster, "Acid");
+                acidCount -= 1;
+                acidText.GetComponent<Text>().text = acidCount.ToString();
+               
+            }
         }
 
-
+        // Potash
         if(Input.GetKeyDown(KeyCode.P))
         {
-            areaEffect(0, 1, 600, tileMaster, "Alkali");
+            if (potashCount > 0)
+            {
+                areaEffect(0, 1, 600, tileMaster, "Potash");
+                potashCount -= 1;
+                potashText.GetComponent<Text>().text = potashCount.ToString();
+            }
         }
 
     }
@@ -92,7 +116,7 @@ public class BoardManager : MonoBehaviour {
 
         public bool grownThisTurn = false;
         public int growthTimer = 0;
-        public int growthTimerReset = 1;
+        public int growthTimerReset = 10;
 
         public void setFloorName(string name)
         {
@@ -104,15 +128,15 @@ public class BoardManager : MonoBehaviour {
             {
                 floorTypeName = "Acid";
             }
-            if (name == "Alkali" && floorTypeName == "Basic")
+            if (name == "Potash" && floorTypeName == "Basic")
             {
-                floorTypeName = "Alkali";
+                floorTypeName = "Potash";
             }
-            if (name == "Acid" && floorTypeName == "Alkali")
+            if (name == "Acid" && floorTypeName == "Potash")
             {
                 floorTypeName = "Explosive";
             }
-            if (name == "Alkali" && floorTypeName == "Acid")
+            if (name == "Potash" && floorTypeName == "Acid")
             {
                 floorTypeName = "Explosive";
             }
@@ -128,22 +152,34 @@ public class BoardManager : MonoBehaviour {
                 if (floorTypeName == "Explosive")
                 {
                     floorType = 0;
+                    yoghurtLevelMax = 5;
+                    growthTimerReset = 3;
 
                 }
 
                 if (floorTypeName == "Basic")
                 {
                     floorType = 2;
+                    yoghurtLevelMax = 5;
+                    growthTimerReset = 6;
                 }
 
                 if (floorTypeName == "Acid")
                 {
                     floorType = 1;
+                    if(yoghurtLevel < 4)
+                    {
+                        yoghurtLevelMax = 3;
+
+                    }
+                    growthTimerReset = 0;
                 }
 
-                if (floorTypeName == "Alkali")
+                if (floorTypeName == "Potash")
                 {
+                    yoghurtLevelMax = 5;
                     floorType = 3;
+                    growthTimerReset = 10;
                 }
 
 
@@ -178,7 +214,7 @@ public class BoardManager : MonoBehaviour {
                     // standard basic floor
                     //myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
                     // Ochre
-                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.75f, 0.4f, 0.1f, 1.0f);
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.75f, 0.4f, 0.3f, 1.0f);
                 }
                 else if (floorType == 3)
                 {
@@ -233,7 +269,7 @@ public class BoardManager : MonoBehaviour {
 
         public void updateYoghurt(GameObject[] yogTypes, GameObject yoghurtHolder)
         {
-            if (yoghurtLevel > 5) yoghurtLevel = 5;
+            if (yoghurtLevel > yoghurtLevelMax) yoghurtLevel = yoghurtLevelMax;
             if (yoghurtLevel < 0) yoghurtLevel = 0;
 
   
@@ -755,8 +791,8 @@ public class BoardManager : MonoBehaviour {
 
         // 
 
-        Debug.Log(monasteryBottommostY);
-        Debug.Log(monasteryTopmostY);
+        //Debug.Log(monasteryBottommostY);
+        //Debug.Log(monasteryTopmostY);
 
         // Find sample tiles in extreme top and bottom to know where to place doorways
         for (int c = 0; c < tileMaster.Count; c++)
@@ -890,9 +926,7 @@ public class BoardManager : MonoBehaviour {
 
                // Growth depends on tile type
 
-                // Type 0 growth: Very Acidic
-
-                // Type 1 growth: Acidic
+                // Type 0 growth: Explosive
 
                 if (tileMaster[tileIndex].floorType == 0)
                 {
@@ -901,6 +935,7 @@ public class BoardManager : MonoBehaviour {
                     if(tileMaster[tileIndex].yoghurtLevel == 5)
                     {
                         tileMaster[tileIndex].yoghurtLevel = 0;
+                        tileMaster[tileIndex].setFloorName("Basic");
                         tileMaster[tileIndex].updateYoghurt(yoghurtTypes, yoghurtHolder);
                         tileMaster[tileIndex].floorType += 1;
                         tileMaster[tileIndex].updateColour();
@@ -908,6 +943,7 @@ public class BoardManager : MonoBehaviour {
                         for (int n = 0; n < 8; n++)
                         {
                             tileMaster[tileMaster[tileIndex].nbTiles[n]].yoghurtLevel = 0;
+                            
                             tileMaster[tileMaster[tileIndex].nbTiles[n]].updateYoghurt(yoghurtTypes, yoghurtHolder);
 
                         }
@@ -923,6 +959,12 @@ public class BoardManager : MonoBehaviour {
                                 {
                                     tileMaster[targetTileTwoRemoved].forcedYoghurtIncrement();
                                     tileMaster[targetTileTwoRemoved].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                    // also chance of spreading tile
+                                    if(Random.Range(0,10)<5)
+                                    {
+                                        tileMaster[targetTileTwoRemoved].setFloorName("Explosive");
+                                    }
+
                                 }
                             }
 
@@ -933,8 +975,69 @@ public class BoardManager : MonoBehaviour {
                     }
 
                 }
-                // Type 2 growth: Basic = random one per tile
 
+                // Type 1 growth: Acidic
+                // Fermentation in an acidic environment is faster for hyperyoghurt
+                // But maximum level is set to 3
+                // Prefers greatly growing on acid
+                if (tileMaster[tileIndex].floorType == 1)
+                {
+
+                    // Get randomised cardinal directions
+                    int r = Random.Range(1, 5);
+                    if (r == 2)
+                        r = 6;
+
+                    int targetTile = tileMaster[tileIndex].nbTiles[r];
+                    int growthChance = 3;
+                    if(tileMaster[targetTile].floorType == 1)
+                    {
+                        growthChance = 8;
+                    }
+
+                    if (Random.Range(0, 10) < growthChance)
+                    {
+                        // Catch cases where tile doesn't exist
+                        if (targetTile != -1)
+                        {
+                            // isn't growing on a wall
+                            if (!tileMaster[targetTile].isMonasteryWall())
+                            {
+                                // Make sure yoghurt doesn't exist on tile already
+                                if (tileMaster[targetTile].myYoghurt == null)
+                                {
+                                    // Make sure can't grow more than once a turn
+                                    if (!tileMaster[targetTile].grownThisTurn)
+                                    {
+                                        // Different growth processes
+
+                                        //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                        tileMaster[targetTile].yoghurtIncrement();
+                                        tileMaster[targetTile].grownThisTurn = true;
+                                        tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                    }
+                                }
+                                else
+                                // pre-existing yoghurt
+                                {
+
+                                    // yoghurt is beyond level 1
+                                    if (!tileMaster[targetTile].grownThisTurn)
+                                    {
+                                        // Different growth processes
+
+                                        //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                        tileMaster[targetTile].yoghurtIncrement();
+                                        tileMaster[targetTile].grownThisTurn = true;
+                                        tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Type 2 growth: Basic = random one per tile
                 if (tileMaster[tileIndex].floorType == 2)
                 {
                 
@@ -984,9 +1087,12 @@ public class BoardManager : MonoBehaviour {
                     }
                 }
 
-                // Type 3 growth: Alkaline
+                // Type 3 growth: Potash
 
-                // Type 4 growth: Very Alkaline
+
+
+
+                // Type 4 growth: Very Potashy
 
             }
         }
@@ -1085,28 +1191,28 @@ public class BoardManager : MonoBehaviour {
                 }
             }
 
-            if (areaEffectImpact == "Alkali")
+            if (areaEffectImpact == "Potash")
             {
                 if(Random.Range(0,10)<5)
                 {
-                    this.GetComponent<LogManager>().logMessage("The lye spreads quickly.");
+                    this.GetComponent<LogManager>().logMessage("The potash covers a lot of ground.");
 
                 }
                 else
                 {
-                    this.GetComponent<LogManager>().logMessage("You splash the lye around you.");
+                    this.GetComponent<LogManager>().logMessage("You sprinkle the potash around you.");
                 }
                 
             } else if (areaEffectImpact == "Acid")
             {
                 if (Random.Range(0, 10) < 5)
                 {
-                    this.GetComponent<LogManager>().logMessage("You pour treasured wine on the ground.");
+                    this.GetComponent<LogManager>().logMessage("You pour treasured acid on the ground.");
 
                 }
                 else
                 {
-                    this.GetComponent<LogManager>().logMessage("A steady stream of wine swiftly covers a large area.");
+                    this.GetComponent<LogManager>().logMessage("A steady stream of acid swiftly covers a large area.");
                 }
             }
 
@@ -1136,6 +1242,15 @@ public class BoardManager : MonoBehaviour {
             return true;
         }
         return false;
+    }
+
+    public bool checkPlayerSurrounded(Vector3 playerPos)
+    {
+        // find player tile
+        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == playerPos.y);
+        int activeTileIndex = sameRow.Find(TileData => TileData.x == playerPos.x).getIndex();
+
+        return checkSurrounded(activeTileIndex);
     }
 
     public bool checkSurrounded(int tileIndex)
@@ -1236,6 +1351,26 @@ public class BoardManager : MonoBehaviour {
 
     }
 
+    void placeAcid(int acidCount)
+    {
+        for (int r = 0; r < acidCount; r++)
+        {
+            int targetTile = RandomTileInMonastery();
+            Instantiate(acidObject, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
+        }
+
+    }
+
+    void placePotash(int potashCount)
+    {
+        for (int r = 0; r < potashCount; r++)
+        {
+            int targetTile = RandomTileInMonastery();
+            Instantiate(potashObject, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
+        }
+
+    }
+
     void placeStartYoghurts(int yoghurtCount)
     {
         for (int j = 0; j < yoghurtCount; j++)
@@ -1261,6 +1396,10 @@ public class BoardManager : MonoBehaviour {
         int yoghurtCount = (int)Mathf.Log(8, 2f);
         placeStartYoghurts(yoghurtCount);
 
+        int potashCount = Random.Range(4, 8);
+        placePotash(potashCount);
+        int acidCount = Random.Range(4, 8);
+        placeAcid(acidCount);
 
         int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 on level 8, etc.
         //LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);

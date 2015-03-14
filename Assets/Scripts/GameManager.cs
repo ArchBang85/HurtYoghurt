@@ -58,7 +58,14 @@ public class GameManager : MonoBehaviour {
         piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
 	    InitGame();
     }
-	
+
+    void Start()
+    {
+   
+        
+    }
+
+
     // Call when scene is loaded
     private void OnLevelWasLoaded(int index)
     {
@@ -134,6 +141,12 @@ public class GameManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+
+        if (piscesScript == null)
+        {
+            piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
+
+        }
         // Setup the game
         if(charSetup)
         {
