@@ -11,6 +11,9 @@ public class Player : MovingObject {
     public float restartLevelDelay = 1f;
     public Text foodText;
 
+    private BoardManager BoardManager;
+    private GameObject gM;
+
     private GameObject mainCam;
     private Animator animator;
     private int food;
@@ -21,7 +24,10 @@ public class Player : MovingObject {
         food = GameManager.instance.playerFoodPoints;
         foodText.text = "Food " + food;
         mainCam = GameObject.Find("Main Camera");
+     
+
         base.Start();
+
 	}
 	
     private void OnDisable()
@@ -42,6 +48,7 @@ public class Player : MovingObject {
 
         CheckIfGameOver();
         GameManager.instance.playerTurn = false;
+        
     }
 
 
@@ -100,12 +107,27 @@ public class Player : MovingObject {
             horisontal = 1;
             vertical = 1;
         }
-        if (horisontal != 0 || vertical != 0)
+        if ((horisontal != 0 || vertical != 0) && !(horisontal !=0 && vertical != 0))
         {
             AttemptMove<Walls>(horisontal, vertical);
-           mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
-
+            mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
         }
+        else if (horisontal != 0 && vertical != 0)
+        {
+            gM = GameObject.FindGameObjectWithTag("GameController");
+            BoardManager = gM.GetComponent<BoardManager>();
+            // Different movement for diagonals so that can squeeze by corners, BUT shouldn't get out of monastery
+            // Check for full-stack yoghurt and walls and presence in monastery
+            if(BoardManager.checkDiagonal(horisontal, vertical))
+            {
+                //this.transform.collider2D.enabled = false;
+                SmoothMovementThroughWalls(new Vector3(horisontal, vertical, 0));
+                CheckIfGameOver();
+                GameManager.instance.playerTurn = false;
+            }
+                       
+        }
+
 	}
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -155,8 +177,20 @@ public class Player : MovingObject {
     }
     private void CheckIfGameOver()
     {
-        if (food <= 0)
-            GameManager.instance.GameOver();
+        
+        //if()
+        //{
+            
+
+
+
+        //}
+        
+        
+        //if (food <= 0)
+
+
+            //GameManager.instance.GameOver();
     }
 
 

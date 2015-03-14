@@ -81,6 +81,27 @@ public abstract class MovingObject : MonoBehaviour
         }
     }
 
+    // smooth movement coroutine
+    protected IEnumerator SmoothMovementThroughWalls(Vector3 end)
+    {
+        boxCollider.enabled = false;
+        // sqrMagnitude computationally cheaper
+        float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
+
+        while (sqrRemainingDistance > float.Epsilon)
+        {
+            Vector3 newPosition = Vector3.MoveTowards(rb2D.position, end, inverseMoveTime * Time.deltaTime);
+            rb2D.MovePosition(newPosition);
+            // Recalculate remaining distance after movement
+            sqrRemainingDistance = (transform.position - end).sqrMagnitude;
+            // Wait for a frame before re-evaluating condition of loop
+            yield return null;
+
+
+        }
+       
+
+    }
     protected abstract void OnCantMove<T>(T component)
         where T : Component;
 

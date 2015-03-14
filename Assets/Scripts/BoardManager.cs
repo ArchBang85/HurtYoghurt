@@ -81,48 +81,55 @@ public class BoardManager : MonoBehaviour {
         private int yoghurtLevelMax = 5;
 
         public bool grownThisTurn = false;
-        public int growthTimer = 1;
+        public int growthTimer = 0;
         public int growthTimerReset = 1;     
 
         public void updateColour()
         {
-            // Allow yoghurtlevel to loop around 
-            if(floorType > floorTypeMax)
+            if (this.isMonasteryTile)
             {
-                floorType = floorTypeMax;
-            } else if (floorType < 0)
-            {
-                floorType = 0;
-            }
+                // Allow yoghurtlevel to loop around 
+                if (floorType > floorTypeMax)
+                {
+                    floorType = floorTypeMax;
+                }
+                else if (floorType < 0)
+                {
+                    floorType = 0;
+                }
 
-            if (floorType == 0)
-            {
-                // green
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
+                if (floorType == 0)
+                {
+                    // green
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.3f, 0.8f, 0.2f, 1.0f);
+                }
+                else if (floorType == 1)
+                {
+                    // cyan
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
+
+                }
+                else if (floorType == 2)
+                {
+                    // standard basic floor
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
+                }
+                else if (floorType == 3)
+                {
+                    // yellow
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
+                }
+                else if (floorType == 4)
+                {
+
+                    // ochre
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
+                }
             }
-            else if (floorType == 1)
-            {
-                // cyan
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.05f, 0.95f, 0.9f, 1.0f);
-                
-            }
-            else if (floorType == 2)
-            {
-                // standard basic floor
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
-            }
-            else if (floorType == 3)
-            {
-                // yellow
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.95f, 0.92f, 0.05f, 1.0f);
-            }
-            else if (floorType == 4)
-            {
-      
-                // ochre
-                myFloor.GetComponent<SpriteRenderer>().color = new Color(0.8f, 0.5f, 0.1f, 1.0f);
-            }
-            }
+        }
+       
+        
+    
        
         void spinObject(GameObject obj)
         {
@@ -828,8 +835,30 @@ public class BoardManager : MonoBehaviour {
 
             }
 
-            this.GetComponent<LogManager>().logMessage("You drop the thing");
+            if (areaEffectImpact == 1)
+            {
+                if(Random.Range(0,10)<5)
+                {
+                    this.GetComponent<LogManager>().logMessage("The lye spreads quickly.");
 
+                }
+                else
+                {
+                    this.GetComponent<LogManager>().logMessage("You splash the lye around you.");
+                }
+                
+            } else if (areaEffectImpact == -1)
+            {
+                if (Random.Range(0, 10) < 5)
+                {
+                    this.GetComponent<LogManager>().logMessage("You pour treasured wine on the ground.");
+
+                }
+                else
+                {
+                    this.GetComponent<LogManager>().logMessage("A steady stream of wine swiftly covers a large area.");
+                }
+            }
 
         } else if (areaEffectType == 1)
         {
@@ -860,7 +889,7 @@ public class BoardManager : MonoBehaviour {
         return false;
     }
 
-    bool checkSurrounded(int tileIndex)
+    public bool checkSurrounded(int tileIndex)
     {
         // if fully surrounded, then dies
         int counter = 0;
@@ -876,6 +905,12 @@ public class BoardManager : MonoBehaviour {
         {
             return true;
         }
+        return false;
+    }
+
+    public bool checkDiagonal(int x, int y)
+    {
+        return true;
         return false;
     }
 

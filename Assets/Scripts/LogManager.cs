@@ -35,7 +35,7 @@ public class LogManager : MonoBehaviour
         logMessages.Clear();
         for (int v = 0; v < 5; v++)
         {
-            logMessage("hello " + v);
+            //logMessage("hello " + v);
         }
         foreach(string s in activeLogMessages)
         {
@@ -47,7 +47,7 @@ public class LogManager : MonoBehaviour
             Debug.Log(s);
         }
 
-        logMessage("The yoghurt blurps with horrendous vim.");
+        //logMessage("The yoghurt blurps with horrendous vim.");
    
         
     }
@@ -59,7 +59,7 @@ public class LogManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             scrollLog.transform.Rotate(-Vector3.right, 400 * Time.deltaTime, Space.World);
-            logMessage("test message " + counter);
+            //logMessage("test message " + counter);
             counter += 1;
         }
 
