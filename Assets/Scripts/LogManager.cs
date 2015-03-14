@@ -39,17 +39,17 @@ public class LogManager : MonoBehaviour
         }
         foreach(string s in activeLogMessages)
         {
-            Debug.Log(s);
+            //Debug.Log(s);
         }
        
         foreach (string s in activeLogMessages)
         {
-            Debug.Log(s);
+            //Debug.Log(s);
         }
 
         //logMessage("The yoghurt blurps with horrendous vim.");
    
-        
+
     }
 
 

@@ -20,10 +20,17 @@ public class BoardManager : MonoBehaviour {
     private int yogMax = 5;
     public int acidCount = 5;
     public int potashCount = 5;
+    public int relicCount = 0;
+
     public GameObject acidText;
     public GameObject potashText;
     public GameObject acidObject;
     public GameObject potashObject;
+    public GameObject relicText;
+    public GameObject relicObject;
+
+    int mainWallTopY;
+    int mainWallBottomY;
 
     void Awake()
     {
@@ -35,10 +42,12 @@ public class BoardManager : MonoBehaviour {
     {
         acidText = GameObject.Find("AcidCounter");
         potashText = GameObject.Find("PotashCounter");
+        relicText = GameObject.Find("RelicCounter");
 
         acidText.GetComponent<Text>().text = acidCount.ToString();
         potashText.GetComponent<Text>().text = potashCount.ToString();
-
+        relicText.GetComponent<Text>().text = relicCount.ToString();
+        
     }
     [Serializable]
     public class Count
@@ -722,13 +731,14 @@ public class BoardManager : MonoBehaviour {
 
         // INTERIOR WALLS
 
-        Debug.Log(monasteryLeftmostX);
-        Debug.Log(monasteryRightmostX);
+       // Debug.Log(monasteryLeftmostX);
+      //  Debug.Log(monasteryRightmostX);
 
         // ROUGH HACK
-        int mainWallTopY = 21;
-        int mainWallBottomY = 8;
-
+        mainWallTopY = 21;
+        mainWallBottomY = 8;
+        int middleHighDoorX = 20;
+        int middleLowDoorX = 20;
 
         // vertical partitions
         int partitions = Random.Range(4, 8);
@@ -760,9 +770,7 @@ public class BoardManager : MonoBehaviour {
                             }
                             else
                             {
-
                                 GameObject instance = Instantiate(testWall, new Vector3(xPos, yPos, 0), Quaternion.identity) as GameObject;
-
                                 instance.transform.SetParent(boardHolder);
                                 // Find tilemaster index
 
@@ -813,15 +821,34 @@ public class BoardManager : MonoBehaviour {
             }
         }
 
+        for (int c = 0; c < tileMaster.Count; c++)
+        {
+            if (tileMaster[c].isMonasteryWall() && tileMaster[c].y == 25)
+            {
+
+                middleHighDoorX = tileMaster[c].x;
+                c = tileMaster.Count;
+            }
+        }
+
+        for (int c = 0; c < tileMaster.Count; c++)
+        {
+            if (tileMaster[c].isMonasteryWall() && tileMaster[c].y == 4)
+            {
+                middleLowDoorX = tileMaster[c].x;
+                c = tileMaster.Count;
+            }
+        }
+
 
         for (int xPos = monasteryLeftmostX + 5; xPos < monasteryRightmostX - 5; xPos++)
         {
             if (Random.Range(0, 10) < 2)
             {
                 xPos += 1;
-
+                //4 25
             }
-            else if (xPos != topDoorX)
+            else if (xPos != topDoorX && xPos != middleHighDoorX)
             {
                 GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallTopY, 0), Quaternion.identity) as GameObject;
 
@@ -842,7 +869,7 @@ public class BoardManager : MonoBehaviour {
         }
         for (int xPos = monasteryLeftmostX + 5; xPos < monasteryRightmostX - 5; xPos++)
         {
-            if (xPos != bottomDoorX)
+            if (xPos != bottomDoorX && xPos != middleLowDoorX)
             {
 
                 // Find tilemaster index
@@ -860,6 +887,29 @@ public class BoardManager : MonoBehaviour {
                 xPos += 1;
             }
         }
+
+        // Random horisontal partition
+        // pick out one vertical position
+        
+        if(Random.Range(0,10) < 6)
+        {
+            int yPos = Random.Range(mainWallBottomY + 3, mainWallTopY - 3);
+            if (Random.Range(0,10)<5)
+            {
+                // Left side
+                for (int xPos = monasteryLeftmostX; xPos < (monasteryLeftmostX + Random.Range(2,15)); xPos++)
+                {
+
+                }
+            }
+            else
+            {
+                // Right side
+            }
+
+        }
+
+
 
      
             // What about the interior walls?
@@ -1338,6 +1388,12 @@ public class BoardManager : MonoBehaviour {
         // Shouldn't be too close to yoghurt
 
         int exitTile = RandomTileInMonastery();
+        
+        while (tileMaster[exitTile].y <  mainWallBottomY || tileMaster[exitTile].y > mainWallTopY)
+        {
+            exitTile = RandomTileInMonastery();
+        }
+        
         Instantiate(exit, new Vector3(tileMaster[exitTile].x, tileMaster[exitTile].y, 0f), Quaternion.identity);
     }
 
@@ -1368,6 +1424,11 @@ public class BoardManager : MonoBehaviour {
             int targetTile = RandomTileInMonastery();
             Instantiate(potashObject, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
         }
+
+    }
+
+    void placeStartPlayer()
+    {
 
     }
 

@@ -18,12 +18,21 @@ public class Player : MovingObject {
     private Animator animator;
     private int food;
 
+
+    // 
+    void Awake()
+    {
+
+    }
+
 	// Use this for initialization
-	protected override void Start () {
+    protected override void Start () {
         //animator = GetComponent<Animator>();
         food = GameManager.instance.playerFoodPoints;
         foodText.text = "Food " + food;
         mainCam = GameObject.Find("Main Camera");
+        gM = GameObject.FindGameObjectWithTag("GameController");
+        BoardManager = gM.GetComponent<BoardManager>();
         base.Start();
 
 	}
@@ -54,12 +63,12 @@ public class Player : MovingObject {
     	// Update is called once per frame
 	void Update () {
         if (!GameManager.instance.playerTurn) return;
-
+        
         int horisontal = 0;
         int vertical = 0;
 
-        horisontal = (int)Input.GetAxisRaw("Horizontal");
-        vertical = (int)Input.GetAxisRaw("Vertical");
+        //horisontal = (int)Input.GetAxisRaw("Horizontal");
+        //vertical = (int)Input.GetAxisRaw("Vertical");
 
         // prevent diagonal movement from axis
         //if (horisontal != 0)
@@ -112,6 +121,9 @@ public class Player : MovingObject {
             horisontal = 1;
             vertical = 1;
         }
+
+
+
         if ((horisontal != 0 || vertical != 0) && !(horisontal !=0 && vertical != 0))
         {
             AttemptMove<Walls>(horisontal, vertical);
@@ -122,8 +134,8 @@ public class Player : MovingObject {
         // UGLY HACK
         else if (horisontal != 0 && vertical != 0)
         {
-            gM = GameObject.FindGameObjectWithTag("GameController");
-            BoardManager = gM.GetComponent<BoardManager>();
+            
+            //BoardManager = gM.GetComponent<BoardManager>();
             // Different movement for diagonals so that can squeeze by corners, BUT shouldn't get out of monastery
             // Check for full-stack yoghurt and walls and presence in monastery
             if(BoardManager.checkDiagonal(horisontal, vertical, this.transform.position))
@@ -163,6 +175,12 @@ public class Player : MovingObject {
             BoardManager.acidText.GetComponent<Text>().text = BoardManager.acidCount.ToString();
             other.gameObject.SetActive(false);
         }
+        else if (other.tag == "Relic")
+        {
+            BoardManager.relicCount += 1;
+            BoardManager.relicText.GetComponent<Text>().text = BoardManager.relicCount.ToString();
+            other.gameObject.SetActive(false);
+        }
 
     }
 
@@ -184,14 +202,14 @@ public class Player : MovingObject {
     public void LoseFood (int loss)
     {
        // animator.SetTrigger("playerHit");
-        food -= loss;
-        foodText.text = "-" + loss + " Food: " + food;
-        CheckIfGameOver();
+        //food -= loss;
+        //foodText.text = "-" + loss + " Food: " + food;
+        //CheckIfGameOver();
 
     }
     private void CheckIfGameOver()
     {
-        Debug.Log("Checking for game over");
+        //Debug.Log("Checking for game over");
         if (BoardManager.checkPlayerSurrounded(new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0)))
         {
             Debug.Log("game over");
