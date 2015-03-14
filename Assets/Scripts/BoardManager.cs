@@ -908,9 +908,21 @@ public class BoardManager : MonoBehaviour {
         return false;
     }
 
-    public bool checkDiagonal(int x, int y)
+    public bool checkDiagonal(int x, int y, Vector3 playerPos)
     {
-        return true;
+        int targetX = (int)playerPos.x + x;
+        int targetY = (int)playerPos.y + y;
+
+        // Allow when not a wall / monastery door and when within the bounds
+        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == targetY);
+        // Players tile on tilemap
+        int activeTileIndex = sameRow.Find(TileData => TileData.x == targetX).getIndex();
+
+        // Legit moves for the moment are within the monastery and not walls
+        if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall())
+        {
+            return true;
+        }
         return false;
     }
 

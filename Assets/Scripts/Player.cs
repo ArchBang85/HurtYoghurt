@@ -112,22 +112,24 @@ public class Player : MovingObject {
             AttemptMove<Walls>(horisontal, vertical);
             mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
         }
+        // UGLY HACK
         else if (horisontal != 0 && vertical != 0)
         {
             gM = GameObject.FindGameObjectWithTag("GameController");
             BoardManager = gM.GetComponent<BoardManager>();
             // Different movement for diagonals so that can squeeze by corners, BUT shouldn't get out of monastery
             // Check for full-stack yoghurt and walls and presence in monastery
-            if(BoardManager.checkDiagonal(horisontal, vertical))
+            if(BoardManager.checkDiagonal(horisontal, vertical, this.transform.position))
             {
+               // this.GetComponent<BoxCollider2D>().enabled = false;
                 //this.transform.collider2D.enabled = false;
-                SmoothMovementThroughWalls(new Vector3(horisontal, vertical, 0));
+                Vector3 end = new Vector3(horisontal, vertical, 0) + new Vector3(this.transform.position.x, this.transform.position.y, 0);
+                StartCoroutine(SmoothMovementThroughWalls(end));
                 CheckIfGameOver();
                 GameManager.instance.playerTurn = false;
             }
                        
         }
-
 	}
 
     private void OnTriggerEnter2D(Collider2D other)
