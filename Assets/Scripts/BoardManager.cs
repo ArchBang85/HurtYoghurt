@@ -445,13 +445,8 @@ public class BoardManager : MonoBehaviour {
                         }
                         else
                         {
-                     
-                  
-                      
-                 
-
+                   
                         // See if new tile is within pisces limits
-
                         foreach (GameObject piscesSphere in pisces)
                         {           
                             RaycastHit hit;
@@ -486,7 +481,7 @@ public class BoardManager : MonoBehaviour {
                                     instance.transform.SetParent(boardHolder);
                                     tileMaster[counter].hasTile = true;
                                     tileMaster[counter].myFloor = instance;
-                                    // make a little transparent
+                                    // make the out-of-monastery floor tiles a little transparent for effect
                                     instance.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, 0.5f);
 
                                 }
@@ -496,6 +491,16 @@ public class BoardManager : MonoBehaviour {
                     counter += 1;
                 }
             }
+
+        // KEEP TRACK OF EXTREMITIES OF MONASTERY
+            int monasteryLeftmostX = 1000;
+            int monasteryRightmostX = 0;
+            int monasteryTopmostY = 0;
+            int monasteryBottommostY = 1000;
+
+        // HACK
+            int bottomDoorX = 0;
+            int topDoorX = 0;
 
         // Now see if we can find the outer walls of the monastery within the pisces          
         for (int c = 0; c < tileMaster.Count; c++)
@@ -573,7 +578,7 @@ public class BoardManager : MonoBehaviour {
 
 
            
-            if (tileMaster[c].isMonastery()) // && !tileMaster[c].isChecked())
+            if (tileMaster[c].isMonastery()) 
             {
                 // All 
                 if ((tileMaster[tileMaster[c].nbTiles[1]].isMonastery() && tileMaster[tileMaster[c].nbTiles[4]].isMonastery() && tileMaster[tileMaster[c].nbTiles[3]].isMonastery() && tileMaster[tileMaster[c].nbTiles[6]].isMonastery()))
@@ -589,24 +594,164 @@ public class BoardManager : MonoBehaviour {
                     
                     tileMaster[c].monasteryWallObject = instance;
                     tileMaster[c].boxCollider = instance.GetComponent<BoxCollider2D>();
+
+                    // Check if leftmost or rightmost
+                    if (tileMaster[c].x < monasteryLeftmostX)
+                    {
+                        monasteryLeftmostX = tileMaster[c].x;
+                    }
+                    if (tileMaster[c].x > monasteryRightmostX)
+                    {
+                        monasteryRightmostX = tileMaster[c].x;
+                    }
+                    if (tileMaster[c].y > monasteryTopmostY)
+                    {
+                        monasteryTopmostY= tileMaster[c].y;
+                    }
+                    if (tileMaster[c].y < monasteryBottommostY)
+                    {
+                        monasteryBottommostY = tileMaster[c].y;
+                    }
+
                     //checkDirection(1, 0, 15, c);
                 }
             }
             tileMaster[c].setChecked(true);
         }
 
-        // What about the interior walls?
-        // Should be able to use raycasting here to bounce off interior walls
+        // INTERIOR WALLS
 
-        // Some kind of rules such that rays from tiles past the half-point can only go left,
-        // rays below the midpoint only go up etc
-        //tileMaster[295].showNeighbours(tileMaster);
-        // 
-        for (int g = 0; g < 8; g++ )
+        Debug.Log(monasteryLeftmostX);
+        Debug.Log(monasteryRightmostX);
+
+        // ROUGH HACK
+        int mainWallTopY = 21;
+        int mainWallBottomY = 8;
+
+
+        // vertical partitions
+        int partitions = Random.Range(4, 8);
+        int coolDown = 2;
+        for (int xPos = monasteryLeftmostX + 1; xPos < monasteryRightmostX; xPos++ )
         {
-            Instantiate(testWall, new Vector3(tileMaster[tileMaster[295].nbTiles[g]].x, tileMaster[tileMaster[295].nbTiles[g]].y, 0), Quaternion.identity);
-            tileMaster[tileMaster[295].nbTiles[g]].setMonasteryWall(true);
+            
+            if(partitions > 0)
+            {
+                coolDown -= 1;
+
+                if (coolDown < 0)
+                {
+                    // chance to split
+                    if (Random.Range(0, 10) < 2)
+                    {
+                        int doorWays = Random.Range(1, 3);
+                        int minimalDoorway = Random.Range(mainWallBottomY + 1, mainWallTopY);
+                        // Create vertical partition
+                        for (int yPos = mainWallBottomY + 1; yPos < mainWallTopY; yPos++)
+                        {
+                            // Has to have doorways too
+                            if (yPos == minimalDoorway)
+                            {
+                                // ATM do nothing if there's a doorway
+                            }
+                            else
+                            {
+
+                                GameObject instance = Instantiate(testWall, new Vector3(xPos, yPos, 0), Quaternion.identity) as GameObject;
+
+                                instance.transform.SetParent(boardHolder);
+                                // Find tilemaster index
+
+                                List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
+                                // Players tile on tilemap
+                                int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+                                tileMaster[activeTileIndex].setMonasteryWall(true);
+                                tileMaster[activeTileIndex].monasteryWallObject = instance;
+                                tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
+                            }
+                        }
+
+                            partitions -= 1;
+                            coolDown = 2;
+
+                    }
+                }
+             
+
+            }
         }
+
+        // horisontal partitions
+        // HACK
+
+        // 
+
+        Debug.Log(monasteryBottommostY);
+        Debug.Log(monasteryTopmostY);
+
+        // Find sample tiles in extreme top and bottom to know where to place doorways
+        for (int c = 0; c < tileMaster.Count; c++)
+        {
+            if(tileMaster[c].isMonasteryWall() && tileMaster[c].y == monasteryBottommostY)
+            {
+                bottomDoorX = tileMaster[c].x;
+                c = tileMaster.Count;
+            }
+        }
+        for (int c = 0; c < tileMaster.Count; c++)
+        {
+            if (tileMaster[c].isMonasteryWall() && tileMaster[c].y == monasteryTopmostY)
+            {
+
+                topDoorX = tileMaster[c].x;
+                c = tileMaster.Count;
+            }
+        }
+
+
+        for (int xPos = monasteryLeftmostX + 4; xPos < monasteryRightmostX - 5; xPos++)
+        {
+            if (xPos != topDoorX)
+            {
+                GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallTopY, 0), Quaternion.identity) as GameObject;
+               // GameObject instance2 = Instantiate(testWall, new Vector3(xPos + 1, mainWallTopY, 0), Quaternion.identity) as GameObject;
+
+                
+            }
+            else
+            {
+                xPos += 1;
+            }
+        }
+        for (int xPos = monasteryLeftmostX + 4; xPos < monasteryRightmostX - 5; xPos++)
+        {
+            if (xPos != bottomDoorX)
+            {
+                GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallBottomY, 0), Quaternion.identity) as GameObject;
+                // GameObject instance2 = Instantiate(testWall, new Vector3(xPos + 1, mainWallTopY, 0), Quaternion.identity) as GameObject;
+
+
+            }
+            else
+            {
+                xPos += 1;
+            }
+        }
+
+        //GameObject instance4 = Instantiate(testWall, new Vector3(xPos + 1, mainWallBottomY, 0), Quaternion.identity) as GameObject;
+
+            // What about the interior walls?
+            // Should be able to use raycasting here to bounce off interior walls
+
+            // Some kind of rules such that rays from tiles past the half-point can only go left,
+            // rays below the midpoint only go up etc
+            //tileMaster[295].showNeighbours(tileMaster);
+            // 
+            /*for (int g = 0; g < 8; g++ )
+            {
+                Instantiate(testWall, new Vector3(tileMaster[tileMaster[295].nbTiles[g]].x, tileMaster[tileMaster[295].nbTiles[g]].y, 0), Quaternion.identity);
+                tileMaster[tileMaster[295].nbTiles[g]].setMonasteryWall(true);
+            }*/
 
 
             if (innerWalls)
@@ -826,22 +971,32 @@ public class BoardManager : MonoBehaviour {
 
                 // Do the tiles two above, two left, two right, two below
                 int upperTile = tM[activeTileIndex].nbTiles[1];
-                tM[tM[upperTile].nbTiles[1]].floorType += areaEffectImpact;
-                tM[tM[upperTile].nbTiles[1]].updateColour();
-
+                // But block if monastery wall
+                if(!tM[upperTile].isMonasteryWall())
+                { 
+                    tM[tM[upperTile].nbTiles[1]].floorType += areaEffectImpact;
+                    tM[tM[upperTile].nbTiles[1]].updateColour();
+                }
                 int leftTile = tM[activeTileIndex].nbTiles[3];
-                tM[tM[leftTile].nbTiles[3]].floorType += areaEffectImpact;
-                tM[tM[leftTile].nbTiles[3]].updateColour();
-
+                if (!tM[leftTile].isMonasteryWall())
+                {
+                  
+                    tM[tM[leftTile].nbTiles[3]].floorType += areaEffectImpact;
+                    tM[tM[leftTile].nbTiles[3]].updateColour();
+                }
                 int rightTile = tM[activeTileIndex].nbTiles[4];
-                tM[tM[rightTile].nbTiles[4]].floorType += areaEffectImpact;
-                tM[tM[rightTile].nbTiles[4]].updateColour();
-
+                if (!tM[rightTile].isMonasteryWall())
+                {
+                    tM[tM[rightTile].nbTiles[4]].floorType += areaEffectImpact;
+                    tM[tM[rightTile].nbTiles[4]].updateColour();
+                }
                 int lowerTile = tM[activeTileIndex].nbTiles[6];
-                tM[tM[lowerTile].nbTiles[6]].floorType += areaEffectImpact;
-                tM[tM[lowerTile].nbTiles[6]].updateColour();
-
-
+                if (!tM[lowerTile].isMonasteryWall())
+                {  
+                   
+                    tM[tM[lowerTile].nbTiles[6]].floorType += areaEffectImpact;
+                    tM[tM[lowerTile].nbTiles[6]].updateColour();
+                }
             }
 
             if (areaEffectImpact == 1)
@@ -875,7 +1030,6 @@ public class BoardManager : MonoBehaviour {
         }
 
     }
-
 
     bool checkDirection(int xDir, int yDir, int range, int tileIndex)
     {
@@ -996,11 +1150,16 @@ public class BoardManager : MonoBehaviour {
 
         BoardSetup();
         InitialiseList();
-        LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
-        LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
-        int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 enemies, level 8, etc.
+        //LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
+        //LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
+        
+
+
+        int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 on level 8, etc.
         //LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
+
         relicCount = 5;
+
         // Place relics
         placeRelics(relicCount);
 

@@ -125,6 +125,7 @@ public class Player : MovingObject {
                 Vector3 end = new Vector3(horisontal, vertical, 0) + new Vector3(this.transform.position.x, this.transform.position.y, 0);
                 StartCoroutine(SmoothMovementThroughWalls(end));
                 CheckIfGameOver();
+                mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
                 GameManager.instance.playerTurn = false;
             }
                        
