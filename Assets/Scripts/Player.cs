@@ -20,12 +20,10 @@ public class Player : MovingObject {
 
 	// Use this for initialization
 	protected override void Start () {
-        animator = GetComponent<Animator>();
+        //animator = GetComponent<Animator>();
         food = GameManager.instance.playerFoodPoints;
         foodText.text = "Food " + food;
         mainCam = GameObject.Find("Main Camera");
-     
-
         base.Start();
 
 	}
@@ -68,41 +66,41 @@ public class Player : MovingObject {
         //    vertical = 0;
 
         // Take regular movement also from keypad
-        if (Input.GetKeyDown(KeyCode.Keypad2))
+        if (Input.GetKeyDown(KeyCode.Keypad2) || Input.GetKeyDown(KeyCode.S))
         {
             vertical = -1;
         }
-        if (Input.GetKeyDown(KeyCode.Keypad4))
+        if (Input.GetKeyDown(KeyCode.Keypad4) || Input.GetKeyDown(KeyCode.A))
         {
              horisontal = -1;
         }
-        if (Input.GetKeyDown(KeyCode.Keypad6))
+        if (Input.GetKeyDown(KeyCode.Keypad6) || Input.GetKeyDown(KeyCode.D))
         {
             horisontal = 1;
         }
-        if (Input.GetKeyDown(KeyCode.Keypad8))
+        if (Input.GetKeyDown(KeyCode.Keypad8) || Input.GetKeyDown(KeyCode.W))
         {
             vertical = 1;
         }
         
         // take diagonal movement from corner keys
 
-        if (Input.GetKeyDown(KeyCode.Keypad1) || Input.GetKeyDown(KeyCode.End))
+        if (Input.GetKeyDown(KeyCode.Keypad1) || Input.GetKeyDown(KeyCode.End) || Input.GetKeyDown(KeyCode.Z))
         {
             horisontal = -1;
             vertical = -1;
         }
-        else if (Input.GetKeyDown(KeyCode.Keypad3) || Input.GetKeyDown(KeyCode.PageDown))
+        else if (Input.GetKeyDown(KeyCode.Keypad3) || Input.GetKeyDown(KeyCode.PageDown) || Input.GetKeyDown(KeyCode.C))
         {
             horisontal = 1;
             vertical = -1;
         }
-        else if (Input.GetKeyDown(KeyCode.Keypad7) || Input.GetKeyDown(KeyCode.Home))
+        else if (Input.GetKeyDown(KeyCode.Keypad7) || Input.GetKeyDown(KeyCode.Home) || Input.GetKeyDown(KeyCode.Q))
         {
             horisontal = -1;
             vertical = 1;
         }
-        else if (Input.GetKeyDown(KeyCode.Keypad9) || Input.GetKeyDown(KeyCode.PageUp))
+        else if (Input.GetKeyDown(KeyCode.Keypad9) || Input.GetKeyDown(KeyCode.PageUp) || Input.GetKeyDown(KeyCode.E))
         {
             horisontal = 1;
             vertical = 1;
@@ -112,6 +110,7 @@ public class Player : MovingObject {
             AttemptMove<Walls>(horisontal, vertical);
             mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
         }
+
         // UGLY HACK
         else if (horisontal != 0 && vertical != 0)
         {
@@ -134,11 +133,15 @@ public class Player : MovingObject {
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // How to handle diagonal movement here?
+
         if (other.tag == "Exit")
         {
             Invoke("Restart", restartLevelDelay);
             enabled = false;
         } 
+
+
         else if (other.tag == "Food")
         {
 
@@ -160,18 +163,20 @@ public class Player : MovingObject {
     {
         Walls hitWall = component as Walls;
         hitWall.DamageWall(wallDamage);
-        animator.SetTrigger("playerChop");
+       // animator.SetTrigger("playerChop");
         
     }
 
     private void Restart()
     {
         Application.LoadLevel(Application.loadedLevel);
+
+
     }
 
     public void LoseFood (int loss)
     {
-        animator.SetTrigger("playerHit");
+       // animator.SetTrigger("playerHit");
         food -= loss;
         foodText.text = "-" + loss + " Food: " + food;
         CheckIfGameOver();

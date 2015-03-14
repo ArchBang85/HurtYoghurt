@@ -42,6 +42,12 @@ public class BoardManager : MonoBehaviour {
 
     public void Update()
     {
+
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+          //  Debug.Log(RandomTileInMonastery());
+        }
+
         if(Input.GetKeyDown(KeyCode.G))
         {
             yoghurtBehaviour();
@@ -73,6 +79,8 @@ public class BoardManager : MonoBehaviour {
         public GameObject monasteryWallObject = null;
         public GameObject myFloor = null;
         public GameObject myYoghurt;
+        public bool isExit = false;
+
         public string description;
         public int floorType = 0;
         private int floorTypeMax = 4;
@@ -368,6 +376,7 @@ public class BoardManager : MonoBehaviour {
     public Count wallCount = new Count(5, 9); // minimum and maximum of walls
     public Count foodCount = new Count(1, 3);
     public GameObject exit;
+    public GameObject relic;
     public GameObject[] floorTiles;
     public GameObject[] outFloorTiles;
     public GameObject[] wallTiles;
@@ -934,6 +943,25 @@ public class BoardManager : MonoBehaviour {
         return randomPosition;
     }
 
+    int RandomTileInMonastery()
+    {
+        bool spaceFound = false;
+        while (!spaceFound)
+        {
+            int randomIndex = Random.Range(1, gridPositions.Count);
+            List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == gridPositions[randomIndex].y);
+            // Players tile on tilemap
+            int activeTileIndex = sameRow.Find(TileData => TileData.x == gridPositions[randomIndex].x).getIndex();
+            if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall())
+            {
+                spaceFound = true;
+                return activeTileIndex;
+            }
+        }
+        return -1;
+
+    }
+
     void LayoutObjectAtRandom(GameObject[] tileArray, int minimum, int maximum)
     {
         int objectCount = Random.Range(minimum, maximum + 1);
@@ -946,6 +974,22 @@ public class BoardManager : MonoBehaviour {
         }
     }
 
+    void placeExit()
+    {
+        int exitTile = RandomTileInMonastery();
+        Instantiate(exit, new Vector3(tileMaster[exitTile].x, tileMaster[exitTile].y, 0f), Quaternion.identity);
+    }
+
+    void placeRelics(int relicCount)
+    {
+        for (int r = 0; r < relicCount; r++)
+        {
+            int targetTile = RandomTileInMonastery();
+            Instantiate(relic, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
+        }
+
+    }
+
     public void SetupScene(int level)
     {
         pisces = GameObject.FindGameObjectsWithTag("Pisces");
@@ -954,8 +998,13 @@ public class BoardManager : MonoBehaviour {
         InitialiseList();
         LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
         LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
-        int enemyCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 enemies, level 8, etc.
-        LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
-        Instantiate(exit, new Vector3(columns - 1, rows - 1, 0f), Quaternion.identity);
+        int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 enemies, level 8, etc.
+        //LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
+        relicCount = 5;
+        // Place relics
+        placeRelics(relicCount);
+
+        // Put exit within bounds of monastery
+        placeExit();
     }
 }

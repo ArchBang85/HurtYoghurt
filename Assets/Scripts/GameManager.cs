@@ -93,9 +93,13 @@ public class GameManager : MonoBehaviour {
             rankOptions[2] = GameObject.Find("RankOption3");
             readyButton = GameObject.Find("ReadyText");
         }
+
+
         // Clear out from last level
         enemies.Clear();
+
         piscesScript.setupPisces();
+
         boardScript.SetupScene(level);
     }
 
@@ -126,6 +130,7 @@ public class GameManager : MonoBehaviour {
         levelImage.SetActive(true);
         enabled = false;
     }
+
 	// Update is called once per frame
 	void Update () {
 

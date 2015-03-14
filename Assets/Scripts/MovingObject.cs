@@ -85,7 +85,7 @@ public abstract class MovingObject : MonoBehaviour
     protected IEnumerator SmoothMovementThroughWalls(Vector3 end)
     {
 
-        Debug.Log("Moving through walls");
+        
         // sqrMagnitude computationally cheaper
         float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
 
