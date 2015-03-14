@@ -8,6 +8,11 @@ public class GameManager : MonoBehaviour {
     public float levelStartDelay = 2f;
 
     public float turnDelay = .1f;
+
+    private int turnTicks = 100;
+    public int turnTickReset = 100;
+    public int turnTickCost = 100;
+
     public static GameManager instance = null;
     public BoardManager boardScript;
     public VesicaPisces piscesScript;
@@ -333,9 +338,19 @@ public class GameManager : MonoBehaviour {
 
     public void yoghurtTurn()
     {
-        boardScript.yoghurtBehaviour();
-        playerTurn = true;
 
+        boardScript.yoghurtBehaviour();
+        turnTicks += turnTickCost;
+
+        if (turnTicks > turnTickReset)
+        {
+            playerTurn = true;
+            turnTicks = 0;
+        }
+        else
+        {
+            yoghurtTurn();
+        }
     }
 
     IEnumerator MoveEnemies()

@@ -70,10 +70,10 @@ public class BoardManager : MonoBehaviour {
           //  Debug.Log(RandomTileInMonastery());
         }
 
-        if(Input.GetKeyDown(KeyCode.G))
+        /*if(Input.GetKeyDown(KeyCode.G))
         {
             yoghurtBehaviour();
-        }
+        }*/
 
         // Acididc
         if(Input.GetKeyDown(KeyCode.O))
@@ -114,11 +114,12 @@ public class BoardManager : MonoBehaviour {
         public GameObject myFloor = null;
         public GameObject myYoghurt;
         public bool isExit = false;
-
+        public bool hasPlayer = false;
         public string description;
         public int floorType = 0;
         private int floorTypeMax = 4;
         private string floorTypeName = "Basic";
+        public int terrainCost = 0;
 
         public int yoghurtLevel = 0;
         private int yoghurtLevelMax = 5;
@@ -171,6 +172,7 @@ public class BoardManager : MonoBehaviour {
                     floorType = 2;
                     yoghurtLevelMax = 5;
                     growthTimerReset = 6;
+                    terrainCost = 0;
                 }
 
                 if (floorTypeName == "Acid")
@@ -288,6 +290,7 @@ public class BoardManager : MonoBehaviour {
                 {
                     Destroy(myYoghurt);
                     myYoghurt = null;
+                    terrainCost = 0;
                 }
 
                 if(yoghurtLevel == 1)
@@ -306,6 +309,9 @@ public class BoardManager : MonoBehaviour {
                         {
                             spinObject(yogInstance);
                         }
+
+                        terrainCost = 10;
+
                         //yogInstance.transform.SetParent(yoghurtHolder.transform);
 
                     }
@@ -327,7 +333,7 @@ public class BoardManager : MonoBehaviour {
                             spinObject(yogInstance);
                         }
                         //yogInstance.transform.SetParent(yoghurtHolder.transform);
-
+                        terrainCost = 20;
                     //}
                 } else if (yoghurtLevel == 3)
                 {
@@ -345,6 +351,7 @@ public class BoardManager : MonoBehaviour {
                         spinObject(yogInstance);
                     }
                     //yogInstance.transform.SetParent(yoghurtHolder.transform);
+                    terrainCost = 30;
 
                 } else if (yoghurtLevel == 4)
                 {
@@ -361,6 +368,7 @@ public class BoardManager : MonoBehaviour {
                     {
                         spinObject(yogInstance);
                     }
+                    terrainCost = 40;
                 } else if (yoghurtLevel == 5)
                 {
                     // MAXIMUM YOGHURT
@@ -380,6 +388,7 @@ public class BoardManager : MonoBehaviour {
                     {
                         spinObject(yogInstance);
                     }
+                    terrainCost = 50;
                 }
             
            
@@ -897,14 +906,38 @@ public class BoardManager : MonoBehaviour {
             if (Random.Range(0,10)<5)
             {
                 // Left side
-                for (int xPos = monasteryLeftmostX; xPos < (monasteryLeftmostX + Random.Range(2,15)); xPos++)
+                for (int xPos = monasteryLeftmostX + 2; xPos < (monasteryLeftmostX + Random.Range(2,15)); xPos++)
                 {
-
+                    // Find tilemaster index
+                    List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
+                    int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+                    tileMaster[activeTileIndex].setMonasteryWall(true);
+                    GameObject instance = Instantiate(testWall, new Vector3(xPos, yPos, 0), Quaternion.identity) as GameObject;
+                    instance.transform.SetParent(boardHolder);
+                    tileMaster[activeTileIndex].monasteryWallObject = instance;
+                    tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
                 }
             }
             else
             {
                 // Right side
+                for (int xPos = monasteryRightmostX - 1; xPos > (monasteryRightmostX - Random.Range(2, 15)); xPos--)
+                {
+                    if(Random.Range(0,10) < 6)
+                    {
+                        // Find tilemaster index
+                        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
+                        int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+                        tileMaster[activeTileIndex].setMonasteryWall(true);
+                        GameObject instance = Instantiate(testWall, new Vector3(xPos, yPos, 0), Quaternion.identity) as GameObject;
+                        instance.transform.SetParent(boardHolder);
+                        tileMaster[activeTileIndex].monasteryWallObject = instance;
+                        tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
+                    }
+                    
+
+                }
+                
             }
 
         }
@@ -1273,6 +1306,71 @@ public class BoardManager : MonoBehaviour {
 
     }
 
+    public void updatePlayerPosition(Vector3 startTile, Vector3 endTile)
+    {
+        // update old tile
+        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == startTile.y);
+        int activeTileIndex = sameRow.Find(TileData => TileData.x == startTile.x).getIndex();
+        tileMaster[activeTileIndex].hasPlayer = false;
+        
+        // update new tile
+        sameRow = tileMaster.FindAll(TileData => TileData.y == endTile.y);
+        activeTileIndex = sameRow.Find(TileData => TileData.x == endTile.x).getIndex();
+        tileMaster[activeTileIndex].hasPlayer = true;
+
+        // Update player turn speed based on tile contents
+        this.GetComponent<GameManager>().turnTickCost = this.GetComponent<GameManager>().turnTickReset - tileMaster[activeTileIndex].terrainCost;
+
+        int cost = this.GetComponent<GameManager>().turnTickCost;
+        if (cost >= 90 && cost < 100)
+        {
+            if (Random.Range(0, 10) < 5)
+            {
+                this.GetComponent<LogManager>().logMessage("Bits of yoghurt stick to your feet.");
+            }
+            else
+            {
+                this.GetComponent<LogManager>().logMessage("Your soles are getting sticky.");
+            }
+        }
+        else if (cost >= 80 && cost < 100)
+        {
+            if (Random.Range(0, 10) < 5)
+            {
+                this.GetComponent<LogManager>().logMessage("The gurgling mass below you begins to sting.");
+            }
+            else
+            {
+                this.GetComponent<LogManager>().logMessage("You tread carefully in the holy muck.");
+            }
+        }
+        else if (cost >= 70 && cost < 100)
+        {
+            if (Random.Range(0, 10) < 5)
+            {
+                this.GetComponent<LogManager>().logMessage("It's fairly tricky to move in this mass.");
+            }
+            else
+            {
+                this.GetComponent<LogManager>().logMessage("It takes effort to lift your feet.");
+            }
+        }
+        else if (cost >= 60 && cost < 100)
+        {
+            if (Random.Range(0, 10) < 5)
+            {
+                this.GetComponent<LogManager>().logMessage("The yoghurt reaches beyond your ankles. You should move away.");
+            }
+            else
+            {
+                this.GetComponent<LogManager>().logMessage("There is yoghurt everywhere. It is really slowing you down.");
+            }
+        }
+        
+        //Debug.Log(this.GetComponent<GameManager>().turnTickCost);
+
+    }
+
     bool checkDirection(int xDir, int yDir, int range, int tileIndex)
     {
         
@@ -1325,7 +1423,23 @@ public class BoardManager : MonoBehaviour {
         }
         return false;
     }
+    public bool checkMainDirections(int x, int y, Vector3 playerPos)
+    {
+        int targetX = (int)playerPos.x + x;
+        int targetY = (int)playerPos.y + y;
 
+        // Allow when not a wall / monastery door and when within the bounds
+        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == targetY);
+        // Players tile on tilemap
+        int activeTileIndex = sameRow.Find(TileData => TileData.x == targetX).getIndex();
+
+        // Legit moves for the moment are within the monastery and not walls
+        if (tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall() && tileMaster[activeTileIndex].yoghurtLevel != 5)
+        {
+            return true;
+        }
+        return false;
+    }
     public bool checkDiagonal(int x, int y, Vector3 playerPos)
     {
         int targetX = (int)playerPos.x + x;
@@ -1359,7 +1473,6 @@ public class BoardManager : MonoBehaviour {
         {
             int randomIndex = Random.Range(1, gridPositions.Count);
             List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == gridPositions[randomIndex].y);
-            // Players tile on tilemap
             int activeTileIndex = sameRow.Find(TileData => TileData.x == gridPositions[randomIndex].x).getIndex();
             if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall())
             {

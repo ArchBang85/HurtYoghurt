@@ -18,7 +18,6 @@ public class Player : MovingObject {
     private Animator animator;
     private int food;
 
-
     // 
     void Awake()
     {
@@ -28,34 +27,30 @@ public class Player : MovingObject {
 	// Use this for initialization
     protected override void Start () {
         //animator = GetComponent<Animator>();
-        food = GameManager.instance.playerFoodPoints;
-        foodText.text = "Food " + food;
+        //food = GameManager.instance.playerFoodPoints;
+        //foodText.text = "Food " + food;
         mainCam = GameObject.Find("Main Camera");
         gM = GameObject.FindGameObjectWithTag("GameController");
         BoardManager = gM.GetComponent<BoardManager>();
         base.Start();
-
 	}
 	
     private void OnDisable()
     {
         // store points when changing levels
-        GameManager.instance.playerFoodPoints = food;
+        //GameManager.instance.playerFoodPoints = food;
     }
 
     protected override void AttemptMove<T>(int xDir, int yDir)
     {
-        // hunger clock
-        food--;
-        foodText.text = "Food " + food;
-
         base.AttemptMove<T>(xDir, yDir);
 
         RaycastHit2D hit;
 
         CheckIfGameOver();
         GameManager.instance.playerTurn = false;
-        
+
+
     }
 
 
@@ -63,7 +58,6 @@ public class Player : MovingObject {
     	// Update is called once per frame
 	void Update () {
         if (!GameManager.instance.playerTurn) return;
-        
         int horisontal = 0;
         int vertical = 0;
 
@@ -123,11 +117,22 @@ public class Player : MovingObject {
         }
 
 
-
         if ((horisontal != 0 || vertical != 0) && !(horisontal !=0 && vertical != 0))
         {
-            AttemptMove<Walls>(horisontal, vertical);
-            mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
+            //AttemptMove<Walls>(horisontal, vertical);
+            if(BoardManager.checkMainDirections(horisontal, vertical, this.transform.position))
+            {
+
+
+                Vector3 end = new Vector3((int)horisontal, (int)vertical, 0) + new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0);
+                StartCoroutine(SmoothMovement(end));
+                CheckIfGameOver();
+                mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + (int)horisontal, (int)transform.position.y + (int)vertical);
+                GameManager.instance.playerTurn = false;
+
+                BoardManager.updatePlayerPosition(new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0), new Vector3((int)horisontal, (int)vertical, 0) + new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0));
+
+            }
             //this.transform.position = Vector3.MoveTowards(this.transform.position, new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0), 0f);
         }
 
@@ -147,6 +152,9 @@ public class Player : MovingObject {
                 CheckIfGameOver();
                 mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + (int)horisontal, (int)transform.position.y + (int)vertical);
                 GameManager.instance.playerTurn = false;
+
+                BoardManager.updatePlayerPosition(new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0), new Vector3((int)horisontal, (int)vertical, 0) + new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0));
+              
             }
                        
         }
@@ -161,7 +169,6 @@ public class Player : MovingObject {
             Invoke("Restart", restartLevelDelay);
             enabled = false;
         } 
-
 
         else if (other.tag == "Potash")
         {
