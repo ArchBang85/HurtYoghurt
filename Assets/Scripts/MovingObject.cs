@@ -84,7 +84,7 @@ public abstract class MovingObject : MonoBehaviour
     // smooth movement coroutine
     protected IEnumerator SmoothMovementThroughWalls(Vector3 end)
     {
-
+        boxCollider.enabled = false;
         
         // sqrMagnitude computationally cheaper
         float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
@@ -100,6 +100,7 @@ public abstract class MovingObject : MonoBehaviour
 
         }
 
+        boxCollider.enabled = true;
     }
     protected abstract void OnCantMove<T>(T component)
         where T : Component;

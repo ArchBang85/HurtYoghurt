@@ -142,7 +142,10 @@ public class GameManager : MonoBehaviour {
 
         if (playerTurn || enemiesMoving || doingSetup || charSetup)
             return;
-        StartCoroutine(MoveEnemies());
+
+        yoghurtTurn();
+
+        // StartCoroutine(MoveEnemies());
 
 	}
 
@@ -313,6 +316,13 @@ public class GameManager : MonoBehaviour {
     public void AddEnemyToList(Enemy script)
     {
         enemies.Add(script);
+    }
+
+    public void yoghurtTurn()
+    {
+        boardScript.yoghurtBehaviour();
+        playerTurn = true;
+
     }
 
     IEnumerator MoveEnemies()

@@ -16,6 +16,7 @@ public class BoardManager : MonoBehaviour {
     public bool innerWalls = false;
     private bool yoghurtStart = true;
     public GameObject[] particleEffects = new GameObject[3];
+    private int yogMax = 5;
 
     void Awake()
     {
@@ -120,7 +121,9 @@ public class BoardManager : MonoBehaviour {
                 else if (floorType == 2)
                 {
                     // standard basic floor
-                    myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
+                    //myFloor.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1.0f);
+                    // Ochre
+                    myFloor.GetComponent<SpriteRenderer>().color = new Color(0.75f, 0.4f, 0.1f, 1.0f);
                 }
                 else if (floorType == 3)
                 {
@@ -164,8 +167,15 @@ public class BoardManager : MonoBehaviour {
             }
             growthTimer -= 1;
 
+        }
+        public void forcedYoghurtIncrement()
+        {
+          
+           yoghurtLevel += 1;
+            
 
         }
+
         public void updateYoghurt(GameObject[] yogTypes, GameObject yoghurtHolder)
         {
             if (yoghurtLevel > 5) yoghurtLevel = 5;
@@ -632,7 +642,7 @@ public class BoardManager : MonoBehaviour {
         // vertical partitions
         int partitions = Random.Range(4, 8);
         int coolDown = 2;
-        for (int xPos = monasteryLeftmostX + 1; xPos < monasteryRightmostX; xPos++ )
+        for (int xPos = monasteryLeftmostX + 3; xPos < monasteryRightmostX - 2; xPos++ )
         {
             
             if(partitions > 0)
@@ -645,7 +655,7 @@ public class BoardManager : MonoBehaviour {
                     if (Random.Range(0, 10) < 2)
                     {
                         int doorWays = Random.Range(1, 3);
-                        int minimalDoorway = Random.Range(mainWallBottomY + 1, mainWallTopY);
+                        int minimalDoorway = Random.Range(mainWallBottomY + 3, mainWallTopY - 2);
                         // Create vertical partition
                         for (int yPos = mainWallBottomY + 1; yPos < mainWallTopY; yPos++)
                         {
@@ -653,6 +663,9 @@ public class BoardManager : MonoBehaviour {
                             if (yPos == minimalDoorway)
                             {
                                 // ATM do nothing if there's a doorway
+                            } else if (Random.Range(0,10) < 2 && yPos > mainWallBottomY + 2 && yPos < mainWallTopY)
+                            {
+
                             }
                             else
                             {
@@ -665,6 +678,7 @@ public class BoardManager : MonoBehaviour {
                                 List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
                                 // Players tile on tilemap
                                 int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+
                                 tileMaster[activeTileIndex].setMonasteryWall(true);
                                 tileMaster[activeTileIndex].monasteryWallObject = instance;
                                 tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
@@ -709,27 +723,45 @@ public class BoardManager : MonoBehaviour {
         }
 
 
-        for (int xPos = monasteryLeftmostX + 4; xPos < monasteryRightmostX - 5; xPos++)
+        for (int xPos = monasteryLeftmostX + 5; xPos < monasteryRightmostX - 5; xPos++)
         {
-            if (xPos != topDoorX)
+            if (Random.Range(0, 10) < 2)
+            {
+                xPos += 1;
+
+            }
+            else if (xPos != topDoorX)
             {
                 GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallTopY, 0), Quaternion.identity) as GameObject;
-               // GameObject instance2 = Instantiate(testWall, new Vector3(xPos + 1, mainWallTopY, 0), Quaternion.identity) as GameObject;
 
-                
+                instance.transform.SetParent(boardHolder);
+                // Find tilemaster index
+
+                List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == mainWallTopY);
+                // Players tile on tilemap
+                int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+                tileMaster[activeTileIndex].setMonasteryWall(true);
+                tileMaster[activeTileIndex].monasteryWallObject = instance;
+                tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
             }
-            else
+             else
             {
                 xPos += 1;
             }
         }
-        for (int xPos = monasteryLeftmostX + 4; xPos < monasteryRightmostX - 5; xPos++)
+        for (int xPos = monasteryLeftmostX + 5; xPos < monasteryRightmostX - 5; xPos++)
         {
             if (xPos != bottomDoorX)
             {
-                GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallBottomY, 0), Quaternion.identity) as GameObject;
-                // GameObject instance2 = Instantiate(testWall, new Vector3(xPos + 1, mainWallTopY, 0), Quaternion.identity) as GameObject;
 
+                // Find tilemaster index
+                List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == mainWallBottomY);
+                int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+                tileMaster[activeTileIndex].setMonasteryWall(true);
+                GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallBottomY, 0), Quaternion.identity) as GameObject;
+                instance.transform.SetParent(boardHolder);
+                tileMaster[activeTileIndex].monasteryWallObject = instance;
+                tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
 
             }
             else
@@ -738,8 +770,7 @@ public class BoardManager : MonoBehaviour {
             }
         }
 
-        //GameObject instance4 = Instantiate(testWall, new Vector3(xPos + 1, mainWallBottomY, 0), Quaternion.identity) as GameObject;
-
+     
             // What about the interior walls?
             // Should be able to use raycasting here to bounce off interior walls
 
@@ -833,9 +864,9 @@ public class BoardManager : MonoBehaviour {
                             int targetTileTwoRemoved = tileMaster[tTile].nbTiles[n];
                             if(tileMaster[targetTileTwoRemoved].isMonastery() && !tileMaster[targetTileTwoRemoved].isMonasteryWall())
                             {
-                                if (Random.Range(0, 10) < 2)
+                                if (Random.Range(0, 10) < 3)
                                 {
-                                    tileMaster[targetTileTwoRemoved].yoghurtIncrement();
+                                    tileMaster[targetTileTwoRemoved].forcedYoghurtIncrement();
                                     tileMaster[targetTileTwoRemoved].updateYoghurt(yoghurtTypes, yoghurtHolder);
                                 }
                             }
@@ -905,7 +936,7 @@ public class BoardManager : MonoBehaviour {
             }
         }
 
-    void yoghurtBehaviour()
+    public void yoghurtBehaviour()
     {
 
         // reset growth allowance
@@ -918,7 +949,7 @@ public class BoardManager : MonoBehaviour {
         if (yoghurtStart)
         {
             // Should be randomised and depend on level
-            tileMaster[444].myYoghurt = Instantiate(yoghurtTypes[0], new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
+           // tileMaster[444].myYoghurt = Instantiate(yoghurtTypes[0], new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
             yoghurtStart = false;
         }
 
@@ -1062,6 +1093,10 @@ public class BoardManager : MonoBehaviour {
             {
                 counter += 1;
             }
+            if(tileMaster[tileMaster[tileIndex].nbTiles[t]].isMonasteryWall())
+            {
+                counter += 1;
+            }
         }
 
         if (counter == 8)
@@ -1082,7 +1117,7 @@ public class BoardManager : MonoBehaviour {
         int activeTileIndex = sameRow.Find(TileData => TileData.x == targetX).getIndex();
 
         // Legit moves for the moment are within the monastery and not walls
-        if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall())
+        if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall() && tileMaster[activeTileIndex].yoghurtLevel != 5)
         {
             return true;
         }
@@ -1130,6 +1165,8 @@ public class BoardManager : MonoBehaviour {
 
     void placeExit()
     {
+        // Shouldn't be too close to yoghurt
+
         int exitTile = RandomTileInMonastery();
         Instantiate(exit, new Vector3(tileMaster[exitTile].x, tileMaster[exitTile].y, 0f), Quaternion.identity);
     }
@@ -1144,15 +1181,30 @@ public class BoardManager : MonoBehaviour {
 
     }
 
+    void placeStartYoghurts(int yoghurtCount)
+    {
+        for (int j = 0; j < yoghurtCount; j++)
+        {
+            int targetTile = RandomTileInMonastery();
+            tileMaster[targetTile].yoghurtLevel = yogMax;
+            tileMaster[targetTile].updateYoghurt(yoghurtTypes,yoghurtHolder);
+
+        }
+        
+    }
+
     public void SetupScene(int level)
     {
         pisces = GameObject.FindGameObjectsWithTag("Pisces");
 
         BoardSetup();
         InitialiseList();
+
         //LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
         //LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
-        
+
+        int yoghurtCount = (int)Mathf.Log(8, 2f);
+        placeStartYoghurts(yoghurtCount);
 
 
         int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 on level 8, etc.

@@ -65,6 +65,12 @@ public class Player : MovingObject {
         //if (horisontal != 0)
         //    vertical = 0;
 
+        // Skip turn with x or 5
+        if(Input.GetKeyDown(KeyCode.Keypad5) || Input.GetKeyDown(KeyCode.X))
+        {
+            GameManager.instance.playerTurn = false;
+        }
+
         // Take regular movement also from keypad
         if (Input.GetKeyDown(KeyCode.Keypad2) || Input.GetKeyDown(KeyCode.S))
         {
@@ -109,6 +115,7 @@ public class Player : MovingObject {
         {
             AttemptMove<Walls>(horisontal, vertical);
             mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
+            //this.transform.position = Vector3.MoveTowards(this.transform.position, new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0), 0f);
         }
 
         // UGLY HACK
@@ -122,10 +129,10 @@ public class Player : MovingObject {
             {
                // this.GetComponent<BoxCollider2D>().enabled = false;
                 //this.transform.collider2D.enabled = false;
-                Vector3 end = new Vector3(horisontal, vertical, 0) + new Vector3(this.transform.position.x, this.transform.position.y, 0);
+                Vector3 end = new Vector3((int)horisontal, (int)vertical, 0) + new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0);
                 StartCoroutine(SmoothMovementThroughWalls(end));
                 CheckIfGameOver();
-                mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + horisontal, (int)transform.position.y + vertical);
+                mainCam.GetComponent<CameraManager>().updatePosition((int)transform.position.x + (int)horisontal, (int)transform.position.y + (int)vertical);
                 GameManager.instance.playerTurn = false;
             }
                        
