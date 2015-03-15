@@ -1672,7 +1672,7 @@ public class BoardManager : MonoBehaviour {
         //LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
         //LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
 
-        int yoghurtCount = (int)Mathf.Log((level + 3), 2f);
+        int yoghurtCount = (int)Mathf.Log((level + 5), 2f);
         placeStartYoghurts(yoghurtCount);
 
         int potashCount = Random.Range(4, 8);

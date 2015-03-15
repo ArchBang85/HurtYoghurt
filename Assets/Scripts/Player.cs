@@ -8,7 +8,7 @@ public class Player : MovingObject {
     public int wallDamage = 1;
     public int pointsPerFood = 10;
     public int pointsPerSoda = 10;
-    public float restartLevelDelay = 1f;
+    public float restartLevelDelay = 1.5f;
     public Text foodText;
 
     private BoardManager BoardManager;
@@ -182,9 +182,9 @@ public class Player : MovingObject {
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("You take the bag of potash and hang it off your belt.");
             } else if (r<6) {
-                BoardManager.gameObject.GetComponent<LogManager>().logMessage("");
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You grab the small bag of potash and hope it will be of some use.");
             } else {
-
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You take the potash, you know yoghurt  doesn't like alkali.");
             }
             
         }
@@ -193,6 +193,22 @@ public class Player : MovingObject {
             BoardManager.acidCount += 1;
             BoardManager.acidText.GetComponent<Text>().text = BoardManager.acidCount.ToString();
             other.gameObject.SetActive(false);
+
+            int r = Random.Range(0, 10);
+
+            if (r < 3)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You pick up the container of acid.");
+            }
+            else if (r < 6)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You grab the acid, taking care not to spill too much of it on yourself.");
+            }
+            else
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You take the acid. The yoghurt likes to grow in acidic areas.");
+            }
+
         }
         else if (other.tag == "Relic")
         {
@@ -200,6 +216,26 @@ public class Player : MovingObject {
             BoardManager.relicText.GetComponent<Text>().text = BoardManager.relicCount.ToString();
             gM.GetComponent<GameManager>().relics += 1;
             other.gameObject.SetActive(false);
+
+
+            int r = Random.Range(0, 12);
+
+            if (r < 3)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You hold the ancestor's revered face.  It hums.");
+            }
+            else if (r < 6)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You remember the tales this head has told you over the years, you hold on to it tight.");
+            }
+            else if (r < 8)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You'd almost forgotten the existence of this relic, but its beauty strikes you now.");
+            }
+            else
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("This foremother told you of distant lands and men with iridescent feathers.");
+            }
         }
 
     }

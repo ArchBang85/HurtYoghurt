@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour {
     public GameObject[] ageOptions = new GameObject[3];
     public GameObject[] conditionOptions = new GameObject[3];
     public GameObject[] rankOptions = new GameObject[3];
-    private int optionIndex = 0;
+    private int optionIndex = -1000;
     private int optionType = 0;
     // Storing the player's selections
     private int[] characterCharacteristics = new int[3];
@@ -61,14 +61,14 @@ public class GameManager : MonoBehaviour {
         DontDestroyOnLoad(gameObject);
         enemies = new List<Enemy>();
 
-
+        InitGame();
         //doSetup = true;
-	    InitGame();
+
     }
 
     void Start()
     {
-   
+       
         
     }
 
@@ -76,19 +76,27 @@ public class GameManager : MonoBehaviour {
     // Call when scene is loaded
     private void OnLevelWasLoaded(int index)
     {
-        
-        level++;
-        if(level >= 3)
+        if (level < 11)
         {
-//            InitGame();
+            level++;
+        }
+        if(level >= 11 && level < 13)
+        {
+
+            //InitGame();
             // Game won!
-            InitGame();
+            //InitGame();
             GameWon();
             
            // this.GetComponent<LogManager>().logMessage("You've made it out of the tree alive! You carry with you " + relics + " relics.");
 
         }
-        else
+        else if (level > 11)
+        {
+            return;
+            // something's awry
+            //GameWon();
+        } else 
         {
 
 
@@ -127,6 +135,7 @@ public class GameManager : MonoBehaviour {
 
           
         }
+
         levelImage = GameObject.Find("LevelImage");
         levelText = GameObject.Find("LevelText").GetComponent<Text>();
         readyButton = GameObject.Find("ReadyText");
@@ -139,7 +148,8 @@ public class GameManager : MonoBehaviour {
         piscesScript.setupPisces();
 
         boardScript.SetupScene(level);
-        ShowLevelImage();
+        //if (!GameOverFlag)
+            ShowLevelImage();
     }
 
     private void ShowLevelImage()
@@ -157,7 +167,6 @@ public class GameManager : MonoBehaviour {
         else
         {
             levelText.text = "You are " + level + " levels down the tree.\n\nHurt Yoghurt";
-        
         }
         levelImage.SetActive(true);
 
@@ -186,49 +195,67 @@ public class GameManager : MonoBehaviour {
 
     public void GameOver()
     {
-        GameOverFlag = true;
-        levelText.text = "On story " + level + ", you were fermented and became one with yoghurt, "+ relics + " relics clutched in your arms, perishing.\n\nr to restart";
+        //levelImage = GameObject.Find("LevelImage");
+        //levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        //GameOverFlag = true;
+        levelText.text = "On story " + level + ", you were fermented and became one with yoghurt, "+ relics + " relics clutched in your arms, perishing.";
         levelImage.SetActive(true);
         enabled = false;
         
         canRestart = true;
-
+       // StartCoroutine("RestartGame", 6.0f);
     }
 
     public void GameWon()
     {
+        levelImage = GameObject.Find("LevelImage");
+        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+
         if(relics==0)
         {
-            levelText.text = "You made it out of the tree of life alive, but did not rescue any relics. Memories of your cowardice will be etched into mountains.\n\nr to rebuild";
+            levelText.text = "You made it out of the tree of life alive, but did not rescue any relics. Memories of your cowardice will be etched into mountains.";
         }
         else if (relics < 9)
         {
-            levelText.text = "You made it out of the tree of life alive, carrying with you " + relics + " relics. So much has still been lost.\n\nr to rebuild";
+            levelText.text = "You made it out of the tree of life alive, carrying with you " + relics + " relics. So much has still been lost.";
         }
         else if (relics < 20)
         {
-            levelText.text = "You emerge from the tree triumphant, carrying with you " + relics + " invaluable relics. The stories will live on.\n\nr to rebuild";
+            levelText.text = "You emerge from the tree triumphant, carrying with you " + relics + " invaluable relics. The stories will live on.";
         }
         else 
         {
-            levelText.text = "You reach the soil with " + relics + " relics in your arms. Your people weep with joy. Your memory will echo through the ages.\n\nr to rebuild";
+            levelText.text = "You reach the soil with " + relics + " relics in your arms. Your people weep with joy. Your memory will echo through the ages.";
         }
     
         levelImage.SetActive(true);
-        GameOverFlag = true;
+       // GameOverFlag = true;
         enabled = false;
-        StartCoroutine("RestartGame", 3.0f);
+        level = 0;
+        relics = 0;
+
+        //StartCoroutine("RestartGame", 15.0f);
     }
 
     void RestartGame()
     {
-        Application.LoadLevel(Application.loadedLevel);
+        level = 0;
+        relics = 0;
+        GameOverFlag = false;
+
+        if (Application.loadedLevel == 0)
+        { 
+            Application.LoadLevel(1);
+        }
+        else
+        {    
+            Application.LoadLevel(0);
+        }
     }
 
 	// Update is called once per frame
 	void Update () {
 
- 
 
         //  if (canRestart)
        // {
