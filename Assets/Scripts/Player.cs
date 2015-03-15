@@ -224,17 +224,25 @@ public class Player : MovingObject {
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("You hold the ancestor's revered face.  It hums.");
             }
-            else if (r < 6)
+            else if (r < 5)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("You remember the tales this head has told you over the years, you hold on to it tight.");
             }
+            else if (r < 6)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("This face has been in the tree for seventeen generations, listening.");
+            }
+            else if (r < 7)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("This relic knows almost all of your youthful embarrassements and fleeting loves.");
+            }
             else if (r < 8)
             {
-                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You'd almost forgotten the existence of this relic, but its beauty strikes you now.");
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("This foremother told you of distant lands and men with iridescent feathers.");
             }
             else
             {
-                BoardManager.gameObject.GetComponent<LogManager>().logMessage("This foremother told you of distant lands and men with iridescent feathers.");
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You'd almost forgotten the existence of this relic, but its beauty strikes you now.");
             }
         }
 

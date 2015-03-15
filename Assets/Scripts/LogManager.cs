@@ -68,16 +68,22 @@ public class LogManager : MonoBehaviour
     // A method that takes new messages and pops it into the array of messages, rotates the roll, removes old messages and adds the new one to the top
     public void logMessage(string s)
     {
-        /*scrollLog = GameObject.Find("ScrollLog");
-        auxCanvas = GameObject.Find("AuxCanvas");
-        auxiliaryLog = GameObject.Find("AuxLogText1");
-        auxiliaryLog2 = GameObject.Find("AuxLogText2");
-        activeLogMessageStrips[0] = GameObject.Find("LogText1");
-        activeLogMessageStrips[1] = GameObject.Find("LogText2");
-        activeLogMessageStrips[2] = GameObject.Find("LogText3");
-        activeLogMessageStrips[3] = GameObject.Find("LogText4");
-        activeLogMessageStrips[4] = GameObject.Find("LogText5");
-        */
+        try
+        {
+
+            auxCanvas = GameObject.Find("AuxCanvas");
+            auxiliaryLog = GameObject.Find("AuxLogText1");
+            auxiliaryLog2 = GameObject.Find("AuxLogText2");
+            activeLogMessageStrips[0] = GameObject.Find("LogText1");
+            activeLogMessageStrips[1] = GameObject.Find("LogText2");
+            activeLogMessageStrips[2] = GameObject.Find("LogText3");
+            activeLogMessageStrips[3] = GameObject.Find("LogText4");
+            activeLogMessageStrips[4] = GameObject.Find("LogText5");
+        }
+        catch
+        {
+
+        }
         string s1 = null;
         string s2 = null;
         
@@ -86,7 +92,7 @@ public class LogManager : MonoBehaviour
         
         // Establish length of log
         // 
-        int maxLineLength = 39;
+        int maxLineLength = 48;
         bool multiLine = false;
         if(s.Length > maxLineLength)
         {
@@ -109,7 +115,13 @@ public class LogManager : MonoBehaviour
         }
 
         // rotate log
-        scrollLog.transform.Rotate(-Vector3.right, 250 * Time.deltaTime, Space.World);
+        try
+        {
+            scrollLog = GameObject.Find("ScrollLog");
+            scrollLog.transform.Rotate(-Vector3.right, 250 * Time.deltaTime, Space.World);
+        
+        }
+        catch { }
         
         // update active messages 
         if(multiLine)
@@ -133,6 +145,7 @@ public class LogManager : MonoBehaviour
         }
 
         // Actually update the texts
+
         for (int t = 0; t < activeLogMessages.Length; t++)
         {
             activeLogMessageStrips[t].GetComponent<Text>().text = activeLogMessages[t];
@@ -144,6 +157,12 @@ public class LogManager : MonoBehaviour
         // {
 
 
+        try
+        {
+            auxCanvas = GameObject.Find("AuxCanvas");
+            auxiliaryLog = GameObject.Find("AuxLogText1");
+            auxiliaryLog2 = GameObject.Find("AuxLogText2");
+
             if (s1 != null)
             {
                 // Remember that Text accessing requires UnityEngine.UI
@@ -153,9 +172,13 @@ public class LogManager : MonoBehaviour
             else
             {
                 auxiliaryLog2.GetComponent<Text>().text = s;
-                auxiliaryLog.GetComponent<Text>().text = "";    
+                auxiliaryLog.GetComponent<Text>().text = "";
             }
-         //}
+        }
+        catch
+        {
+        }
+        //}
 
     }
 }

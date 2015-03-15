@@ -166,7 +166,7 @@ public class GameManager : MonoBehaviour {
         }
         else
         {
-            levelText.text = "You are " + level + " levels down the tree.\n\nHurt Yoghurt";
+            levelText.text = "You are " + level + " levels down the tree\n\nHurt Yoghurt";
         }
         levelImage.SetActive(true);
 
@@ -220,6 +220,10 @@ public class GameManager : MonoBehaviour {
             levelText.text = "You made it out of the tree of life alive, carrying with you " + relics + " relics. So much has still been lost.";
         }
         else if (relics < 20)
+        {
+            levelText.text = "Covered in yoghurt, you stumble out of the monastery. You manager to rescue " + relics + " relics. More could barely have been expected of you.";
+        }
+        else if (relics < 35)
         {
             levelText.text = "You emerge from the tree triumphant, carrying with you " + relics + " invaluable relics. The stories will live on.";
         }

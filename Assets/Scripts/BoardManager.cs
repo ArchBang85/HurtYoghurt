@@ -19,8 +19,8 @@ public class BoardManager : MonoBehaviour {
     private bool yoghurtStart = true;
     public GameObject[] particleEffects = new GameObject[3];
     private int yogMax = 5;
-    public int acidCount = 5;
-    public int potashCount = 5;
+    public int acidCount = 3;
+    public int potashCount = 3;
     public int relicCount = 0;
     public Vector2 previousExitTilePosition = new Vector2(0, 0);
 
@@ -205,7 +205,7 @@ public class BoardManager : MonoBehaviour {
                 {
                     yoghurtLevelMax = 5;
                     floorType = 3;
-                    growthTimerReset = 10;
+                    growthTimerReset = 15;
                 }
 
 
@@ -1200,8 +1200,9 @@ public class BoardManager : MonoBehaviour {
                 }
 
                 // Type 2 growth: Basic = random one per tile
-                if (tileMaster[tileIndex].floorType == 2)
+                if (tileMaster[tileIndex].floorType == 2 || tileMaster[tileIndex].floorType == 3)
                 {
+                    bool allowGrowth = false;
                 
                     // Get randomised cardinal directions
                     int r = Random.Range(1, 5);
@@ -1213,36 +1214,58 @@ public class BoardManager : MonoBehaviour {
                     // Catch cases where tile doesn't exist
                     if (targetTile != -1)
                     {
-                        // isn't growing on a wall
-                        if (!tileMaster[targetTile].isMonasteryWall())
+
+                        int ra = Random.Range(0, 10);
+                        if (tileMaster[tileIndex].floorType == 3)
+                        
                         {
-                            // Make sure yoghurt doesn't exist on tile already
-                            if (tileMaster[targetTile].myYoghurt == null)
+                            if (ra < 4)
                             {
-                                // Make sure can't grow more than once a turn
-                                if (!tileMaster[targetTile].grownThisTurn)
-                                {
-                                    // Different growth processes
-
-                                    //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
-                                    tileMaster[targetTile].yoghurtIncrement();
-                                    tileMaster[targetTile].grownThisTurn = true;
-                                    tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
-                                }
+                                allowGrowth = true;
                             }
-                            else
-                            // pre-existing yoghurt
+                        }
+                        else
+                        {
+                            if(ra < 8)
                             {
-                               
-                                // yoghurt is beyond level 1
-                                if (!tileMaster[targetTile].grownThisTurn)
-                                {
-                                    // Different growth processes
+                                allowGrowth = true;
+                            }
+                        }
+                        if(allowGrowth)
+                        {
 
-                                    //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
-                                    tileMaster[targetTile].yoghurtIncrement();
-                                    tileMaster[targetTile].grownThisTurn = true;
-                                    tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                       
+                            // isn't growing on a wall
+                            if (!tileMaster[targetTile].isMonasteryWall())
+                            {
+                                // Make sure yoghurt doesn't exist on tile already
+                                if (tileMaster[targetTile].myYoghurt == null)
+                                {
+                                    // Make sure can't grow more than once a turn
+                                    if (!tileMaster[targetTile].grownThisTurn)
+                                    {
+                                        // Different growth processes
+
+                                        //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                        tileMaster[targetTile].yoghurtIncrement();
+                                        tileMaster[targetTile].grownThisTurn = true;
+                                        tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                    }
+                                }
+                                else
+                                // pre-existing yoghurt
+                                {
+                               
+                                    // yoghurt is beyond level 1
+                                    if (!tileMaster[targetTile].grownThisTurn)
+                                    {
+                                        // Different growth processes
+
+                                        //tileMaster[targetTile].myYoghurt = Instantiate(yoghurtTypes[], new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0), Quaternion.identity) as GameObject;
+                                        tileMaster[targetTile].yoghurtIncrement();
+                                        tileMaster[targetTile].grownThisTurn = true;
+                                        tileMaster[targetTile].updateYoghurt(yoghurtTypes, yoghurtHolder);
+                                    }
                                 }
                             }
                         }
@@ -1405,9 +1428,18 @@ public class BoardManager : MonoBehaviour {
         int cost = this.GetComponent<GameManager>().turnTickCost;
         if (cost >= 90 && cost < 100)
         {
-            if (Random.Range(0, 10) < 5)
+            int r = Random.Range(0, 10);
+            if (r < 2)
             {
                 this.GetComponent<LogManager>().logMessage("Bits of yoghurt stick to your feet.");
+            } 
+            else if (r < 5)
+            {
+                this.GetComponent<LogManager>().logMessage("Something soft like a whisper wraps itself around your toes.");
+            } 
+            else if (r < 7)
+            {
+                this.GetComponent<LogManager>().logMessage("The puddles of yoghurt at your feet makes noises you almost comprehend.");
             }
             else
             {
@@ -1438,14 +1470,30 @@ public class BoardManager : MonoBehaviour {
         }
         else if (cost >= 60 && cost < 100)
         {
-            if (Random.Range(0, 10) < 5)
+            int r = Random.Range(0, 10);
+            if (r < 1)
             {
                 this.GetComponent<LogManager>().logMessage("The yoghurt reaches beyond your ankles. You should move away.");
+            }
+            else if (r < 2)
+            {
+                this.GetComponent<LogManager>().logMessage("The bubbling mass climbs up your body.");
+            } else if (r < 3)
+            {
+                this.GetComponent<LogManager>().logMessage("An eternal caress is near.");
+            } else if (r < 4)
+            {
+                this.GetComponent<LogManager>().logMessage("Does the cosmic space we dissolve into taste of us?");
+            }
+            else if (r < 5)
+            {
+                this.GetComponent<LogManager>().logMessage("Something flows out of you into the yoghurt.");
             }
             else
             {
                 this.GetComponent<LogManager>().logMessage("There is yoghurt everywhere. It is really slowing you down.");
             }
+
         }
         
         //Debug.Log(this.GetComponent<GameManager>().turnTickCost);
@@ -1675,15 +1723,15 @@ public class BoardManager : MonoBehaviour {
         int yoghurtCount = (int)Mathf.Log((level + 5), 2f);
         placeStartYoghurts(yoghurtCount);
 
-        int potashCount = Random.Range(4, 8);
+        int potashCount = Random.Range(0, 3);
         placePotash(potashCount);
-        int acidCount = Random.Range(4, 8);
+        int acidCount = Random.Range(1, 3);
         placeAcid(acidCount);
 
         int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 on level 8, etc.
         //LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
 
-        relicCount = Random.Range(4,8);
+        relicCount = Random.Range(3,7);
 
         // Place relics
         placeRelics(relicCount);
