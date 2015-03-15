@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour {
     public BoardManager boardScript;
     public VesicaPisces piscesScript;
     private int level = 1;
+    public float relics = 0;
     public int playerFoodPoints = 100;
     [HideInInspector]public bool playerTurn = true;
 
@@ -33,6 +34,8 @@ public class GameManager : MonoBehaviour {
     private int Condition = 1;
     private int Rank = 1;
 
+    private bool GameOverFlag = false;
+    public bool canRestart = false;
     public bool doSetup = true;
     public GameObject readyButton;
     public GameObject[] ageOptions = new GameObject[3];
@@ -73,8 +76,27 @@ public class GameManager : MonoBehaviour {
     // Call when scene is loaded
     private void OnLevelWasLoaded(int index)
     {
+        
         level++;
-        InitGame();
+        if(level >= 3)
+        {
+//            InitGame();
+            // Game won!
+            InitGame();
+            GameWon();
+            
+           // this.GetComponent<LogManager>().logMessage("You've made it out of the tree alive! You carry with you " + relics + " relics.");
+
+        }
+        else
+        {
+
+
+            InitGame();
+        }
+
+
+
 
     }
 
@@ -105,7 +127,8 @@ public class GameManager : MonoBehaviour {
 
           
         }
-
+        levelImage = GameObject.Find("LevelImage");
+        levelText = GameObject.Find("LevelText").GetComponent<Text>();
         readyButton = GameObject.Find("ReadyText");
         // Get a component ref to the attached script
         boardScript = GetComponent<BoardManager>();
@@ -116,22 +139,44 @@ public class GameManager : MonoBehaviour {
         piscesScript.setupPisces();
 
         boardScript.SetupScene(level);
+        ShowLevelImage();
     }
 
     private void ShowLevelImage()
     {
-
+        /*
         if(CharSelectionImage.active)
         {
             CharSelectionImage.SetActive(false);
         }
-
-        levelText.text = "Day " + level;
+        */
+        if(level < 2)
+        {
+            levelText.text = "You are at the top of the tree\n\nHurt Yoghurt";
+        }
+        else
+        {
+            levelText.text = "You are " + level + " levels down the tree.\n\nHurt Yoghurt";
+        
+        }
         levelImage.SetActive(true);
 
         // Wait start time before hiding image
         Invoke("HideLevelImage", levelStartDelay);
     }
+
+    private void ShowLevelImageWithText(string s)
+    {
+
+        levelText.text = s;
+
+        levelImage.SetActive(true);
+
+        // Wait start time before hiding image
+        Invoke("HideLevelImage", levelStartDelay);
+    }
+
+
 
     private void HideLevelImage()
     {
@@ -141,14 +186,78 @@ public class GameManager : MonoBehaviour {
 
     public void GameOver()
     {
-        levelText.text = "After " + level + " levels, you were fermented.";
+        GameOverFlag = true;
+        levelText.text = "On story " + level + ", you were fermented and became one with yoghurt, "+ relics + " relics clutched in your arms, perishing.\n\nr to restart";
         levelImage.SetActive(true);
         enabled = false;
+        
+        canRestart = true;
+
+    }
+
+    public void GameWon()
+    {
+        if(relics==0)
+        {
+            levelText.text = "You made it out of the tree of life alive, but did not rescue any relics. Memories of your cowardice will be etched into mountains.\n\nr to rebuild";
+        }
+        else if (relics < 9)
+        {
+            levelText.text = "You made it out of the tree of life alive, carrying with you " + relics + " relics. So much has still been lost.\n\nr to rebuild";
+        }
+        else if (relics < 20)
+        {
+            levelText.text = "You emerge from the tree triumphant, carrying with you " + relics + " invaluable relics. The stories will live on.\n\nr to rebuild";
+        }
+        else 
+        {
+            levelText.text = "You reach the soil with " + relics + " relics in your arms. Your people weep with joy. Your memory will echo through the ages.\n\nr to rebuild";
+        }
+    
+        levelImage.SetActive(true);
+        GameOverFlag = true;
+        enabled = false;
+        StartCoroutine("RestartGame", 3.0f);
+    }
+
+    void RestartGame()
+    {
+        Application.LoadLevel(Application.loadedLevel);
     }
 
 	// Update is called once per frame
 	void Update () {
 
+ 
+
+        //  if (canRestart)
+       // {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Debug.Log("restarting");
+            //canRestart = false;
+            level = 0;
+            relics = 0;
+            if (Application.loadedLevel == 0)
+            {
+              
+                Application.LoadLevel(1);
+
+            }
+            else
+            {
+               
+                Application.LoadLevel(0);
+
+            }
+
+        }
+
+        if (GameOverFlag)
+        {
+            return;
+        }
+        //}
 
         if (piscesScript == null)
         {

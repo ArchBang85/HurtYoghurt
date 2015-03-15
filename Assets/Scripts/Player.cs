@@ -175,6 +175,18 @@ public class Player : MovingObject {
             BoardManager.potashCount += 1;
             BoardManager.potashText.GetComponent<Text>().text = BoardManager.potashCount.ToString();
             other.gameObject.SetActive(false);
+
+            int r = Random.Range(0, 10);
+
+            if(r<3)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("You take the bag of potash and hang it off your belt.");
+            } else if (r<6) {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("");
+            } else {
+
+            }
+            
         }
         else if (other.tag == "Acid")
         {
@@ -186,6 +198,7 @@ public class Player : MovingObject {
         {
             BoardManager.relicCount += 1;
             BoardManager.relicText.GetComponent<Text>().text = BoardManager.relicCount.ToString();
+            gM.GetComponent<GameManager>().relics += 1;
             other.gameObject.SetActive(false);
         }
 
@@ -219,6 +232,8 @@ public class Player : MovingObject {
         //Debug.Log("Checking for game over");
         if (BoardManager.checkPlayerSurrounded(new Vector3((int)this.transform.position.x, (int)this.transform.position.y, 0)))
         {
+            gM.GetComponent<GameManager>().GameOver();
+            
             Debug.Log("game over");
         }
 

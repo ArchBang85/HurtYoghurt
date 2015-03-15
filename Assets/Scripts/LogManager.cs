@@ -56,18 +56,28 @@ public class LogManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.R))
+    /*        if (Input.GetKeyDown(KeyCode.R))
         {
             scrollLog.transform.Rotate(-Vector3.right, 400 * Time.deltaTime, Space.World);
             //logMessage("test message " + counter);
             counter += 1;
         }
-
+        */
     }
 
     // A method that takes new messages and pops it into the array of messages, rotates the roll, removes old messages and adds the new one to the top
     public void logMessage(string s)
     {
+        /*scrollLog = GameObject.Find("ScrollLog");
+        auxCanvas = GameObject.Find("AuxCanvas");
+        auxiliaryLog = GameObject.Find("AuxLogText1");
+        auxiliaryLog2 = GameObject.Find("AuxLogText2");
+        activeLogMessageStrips[0] = GameObject.Find("LogText1");
+        activeLogMessageStrips[1] = GameObject.Find("LogText2");
+        activeLogMessageStrips[2] = GameObject.Find("LogText3");
+        activeLogMessageStrips[3] = GameObject.Find("LogText4");
+        activeLogMessageStrips[4] = GameObject.Find("LogText5");
+        */
         string s1 = null;
         string s2 = null;
         
@@ -130,8 +140,8 @@ public class LogManager : MonoBehaviour
 
         
         // Update auxiliary log
-       // if (zoomedIn)
-       // {
+        // if (zoomedIn)
+        // {
 
 
             if (s1 != null)
@@ -145,7 +155,7 @@ public class LogManager : MonoBehaviour
                 auxiliaryLog2.GetComponent<Text>().text = s;
                 auxiliaryLog.GetComponent<Text>().text = "";    
             }
-        //}
+         //}
 
     }
 }
