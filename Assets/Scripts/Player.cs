@@ -218,31 +218,55 @@ public class Player : MovingObject {
             other.gameObject.SetActive(false);
 
 
-            int r = Random.Range(0, 12);
+            int r = Random.Range(0, 14);
 
-            if (r < 3)
+            if (r < 1)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("You hold the ancestor's revered face.  It hums.");
             }
-            else if (r < 5)
+            else if (r < 2)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("You remember the tales this head has told you over the years, you hold on to it tight.");
             }
-            else if (r < 6)
+            else if (r < 3)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("This face has been in the tree for seventeen generations, listening.");
             }
-            else if (r < 7)
+            else if (r < 4)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("This relic knows almost all of your youthful embarrassements and fleeting loves.");
             }
-            else if (r < 8)
+            else if (r < 5)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("This foremother told you of distant lands and men with iridescent feathers.");
             }
-            else
+            else if (r < 6)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("The relic's bronze eyes shine comfort towards you as you pocket it.");
+            }
+            else if (r < 7)
             {
                 BoardManager.gameObject.GetComponent<LogManager>().logMessage("You'd almost forgotten the existence of this relic, but its beauty strikes you now.");
+            }
+            else if (r < 8)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("Why do you disturb me? The figurine hisses.");
+            }
+            else if (r < 9)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("'If the yoghurt spreads on a caustic mix the walls might come down!'");
+            }
+            else if (r < 10)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("'What is it, child?' the metal head asks as you grab it.");
+            }
+            else if (r < 11)
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("'Put me down! I long for the sweet night.'");
+            }
+            else
+            {
+                BoardManager.gameObject.GetComponent<LogManager>().logMessage("'Block doorways with potash!' The elder barks from your clutches.");
             }
         }
 
