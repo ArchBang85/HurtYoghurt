@@ -4,32 +4,69 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using Random = UnityEngine.Random; // Need to specify because there's an overlap between System and UnityEngine
 
+// BOARD MANAGER
+// Anything that gets shown as part of the board 
+
+// GAME MANAGER
+// Game turns, stage of game, scorekeeping
+
 //namespace Completed;
+
+// The Boardmanager keeps track of the grid and the tiles
 
 public class BoardManager : MonoBehaviour {
 
-    public GameObject testWall;
-    //public GameObject yoghurt;
-    public GameObject yoghurtHolder;
-    public GameObject[] yoghurtTypes = new GameObject[5];
-    public LayerMask blockingLayer;
+    // MAIN DECLARATIONS //
+
+    // Anything that lives on the board should be taken into the boardmanager
+
+    // Game board size
+    public int columns = 8;
+    public int rows = 8;
+
+    // Instantiable objects
     public GameObject playerObject;
+    public GameObject testWall;
+    public GameObject yoghurtHolder;
+    public LayerMask blockingLayer;
+    public GameObject[] yoghurtTypes = new GameObject[5];
+    public GameObject[] particleEffects = new GameObject[3]; // All particle effects used on board - should
     
-    public bool innerWalls = false;
-    private bool yoghurtStart = true;
-    public GameObject[] particleEffects = new GameObject[3];
-    private int yogMax = 5;
+    // Inventory counters -> this could sit in the game manager too
     public int acidCount = 3;
     public int potashCount = 3;
     public int relicCount = 0;
-    public Vector2 previousExitTilePosition = new Vector2(0, 0);
 
+    // How large can the yoghurt grow
+    private int yogMax = 5;
+
+    // Keeping track of where the player exits
+    private Vector2 previousExitTilePosition = new Vector2(0, 0);
+
+    // Inventory texts
     public GameObject acidText;
     public GameObject potashText;
     public GameObject acidObject;
     public GameObject potashObject;
     public GameObject relicText;
     public GameObject relicObject;
+
+    public List<TileData> tileMaster = new List<TileData>();
+
+    public Count wallCount = new Count(5, 9); // minimum and maximum of walls
+    public Count foodCount = new Count(1, 3);
+    public GameObject exit;
+    public GameObject relic;
+    public GameObject[] floorTiles;
+    public GameObject[] outFloorTiles;
+    public GameObject[] wallTiles;
+    public GameObject[] foodTiles;
+    public GameObject[] enemyTiles;
+    public GameObject[] outerWallTiles;
+
+    private Transform boardHolder;
+    private List<Vector3> gridPositions = new List<Vector3>();
+    public GameObject[] pisces;
 
     int mainWallTopY;
     int mainWallBottomY;
@@ -128,6 +165,7 @@ public class BoardManager : MonoBehaviour {
         public GameObject monasteryWallObject = null;
         public GameObject myFloor = null;
         public GameObject myYoghurt;
+        public GameObject myItem = null;
         public bool isExit = false;
         public bool hasPlayer = false;
         public string description;
@@ -411,7 +449,6 @@ public class BoardManager : MonoBehaviour {
 
         }
 
-        public bool hasItems = false;
         // neighbouring tiles as integers
         // 0 1 2 
         // 3 c 4
@@ -501,27 +538,6 @@ public class BoardManager : MonoBehaviour {
 
     }
 
-    public int columns = 8; 
-    public int rows = 8;
-    public List<TileData> tileMaster = new List<TileData>();
-
-    public bool basicShape = true;
-    
-    public Count wallCount = new Count(5, 9); // minimum and maximum of walls
-    public Count foodCount = new Count(1, 3);
-    public GameObject exit;
-    public GameObject relic;
-    public GameObject[] floorTiles;
-    public GameObject[] outFloorTiles;
-    public GameObject[] wallTiles;
-    public GameObject[] foodTiles;
-    public GameObject[] enemyTiles;
-    public GameObject[] outerWallTiles;
-    
-    private Transform boardHolder;
-    private List <Vector3> gridPositions = new List<Vector3> ();
-
-    public GameObject[] pisces;
 
     void InitialiseList()
     {
@@ -599,8 +615,7 @@ public class BoardManager : MonoBehaviour {
                                     tileMaster[counter].myFloor = instance;   
                                     
                                     // Create basic floor type
-                                    tileMaster[counter].floorType = 2;
-                                    
+                                    tileMaster[counter].floorType = 2;  
                                     tileMaster[counter].updateColour();
 
                                 }
@@ -766,7 +781,7 @@ public class BoardManager : MonoBehaviour {
         int middleLowDoorX = 20;
 
         // vertical partitions
-        int partitions = Random.Range(4, 8);
+        int partitions = Random.Range(4, 20);
         int coolDown = 2;
         for (int xPos = monasteryLeftmostX + 3; xPos < monasteryRightmostX - 2; xPos++ )
         {
@@ -821,11 +836,6 @@ public class BoardManager : MonoBehaviour {
 
         // horisontal partitions
         // HACK
-
-        // 
-
-        //Debug.Log(monasteryBottommostY);
-        //Debug.Log(monasteryTopmostY);
 
         // Find sample tiles in extreme top and bottom to know where to place doorways
         for (int c = 0; c < tileMaster.Count; c++)
@@ -883,10 +893,7 @@ public class BoardManager : MonoBehaviour {
                 List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == mainWallTopY);
                 // Players tile on tilemap
                 int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
-                tileMaster[activeTileIndex].monasteryInnerWall = true;
-                tileMaster[activeTileIndex].setMonasteryWall(true);
-                tileMaster[activeTileIndex].monasteryWallObject = instance;
-                tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
+                addWall(activeTileIndex, testWall);
             }
              else
             {
@@ -901,12 +908,7 @@ public class BoardManager : MonoBehaviour {
                 // Find tilemaster index
                 List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == mainWallBottomY);
                 int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
-                tileMaster[activeTileIndex].monasteryInnerWall = true;
-                tileMaster[activeTileIndex].setMonasteryWall(true);
-                GameObject instance = Instantiate(testWall, new Vector3(xPos, mainWallBottomY, 0), Quaternion.identity) as GameObject;
-                instance.transform.SetParent(boardHolder);
-                tileMaster[activeTileIndex].monasteryWallObject = instance;
-                tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
+                addWall(activeTileIndex, testWall);
 
             }
             else
@@ -929,12 +931,7 @@ public class BoardManager : MonoBehaviour {
                     // Find tilemaster index
                     List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
                     int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
-                    tileMaster[activeTileIndex].monasteryInnerWall = true;
-                    tileMaster[activeTileIndex].setMonasteryWall(true);
-                    GameObject instance = Instantiate(testWall, new Vector3(xPos, yPos, 0), Quaternion.identity) as GameObject;
-                    instance.transform.SetParent(boardHolder);
-                    tileMaster[activeTileIndex].monasteryWallObject = instance;
-                    tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
+                    addWall(activeTileIndex, testWall);
                 }
             }
             if(Random.Range(0,10)<6)
@@ -947,14 +944,9 @@ public class BoardManager : MonoBehaviour {
                         // Find tilemaster index
                         List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
                         int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
-                        tileMaster[activeTileIndex].monasteryInnerWall = true;
-                        tileMaster[activeTileIndex].setMonasteryWall(true);
-                        GameObject instance = Instantiate(testWall, new Vector3(xPos, yPos, 0), Quaternion.identity) as GameObject;
-                        instance.transform.SetParent(boardHolder);
-                        tileMaster[activeTileIndex].monasteryWallObject = instance;
-                        tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
-                    }
-                    
+                        addWall(activeTileIndex, testWall);
+                        
+                    }       
 
                 }
                 
@@ -977,10 +969,7 @@ public class BoardManager : MonoBehaviour {
                 Instantiate(testWall, new Vector3(tileMaster[tileMaster[295].nbTiles[g]].x, tileMaster[tileMaster[295].nbTiles[g]].y, 0), Quaternion.identity);
                 tileMaster[tileMaster[295].nbTiles[g]].setMonasteryWall(true);
             }*/
-
-
-            if (innerWalls)
-            {
+     /*
                 for (int c = 1; c < (columns * rows); c++)
                 {
                     if (tileMaster[c].isMonasteryWall())
@@ -1011,8 +1000,7 @@ public class BoardManager : MonoBehaviour {
                         }
                     }
                 }
-
-            }
+        */
 
 
 
@@ -1291,14 +1279,6 @@ public class BoardManager : MonoBehaviour {
             tileMaster[i].grownThisTurn = false;    
         }
 
-        // set initial yoghurt, do only once
-        if (yoghurtStart)
-        {
-            // Should be randomised and depend on level
-           // tileMaster[444].myYoghurt = Instantiate(yoghurtTypes[0], new Vector3(tileMaster[444].x, tileMaster[444].y, 0), Quaternion.identity) as GameObject;
-            yoghurtStart = false;
-        }
-
         // Go through each tile once and calculate yoghurt behaviour
         for (int i = 0; i < tileMaster.Count; i++)
         {
@@ -1500,6 +1480,62 @@ public class BoardManager : MonoBehaviour {
 
     }
 
+    void addWall(int activeTileIndex, GameObject wallType)
+    {
+        // Make sure the index is legit, catch errors
+        try
+        {
+            int chk = tileMaster[activeTileIndex].getIndex();
+        }
+        catch
+        {
+            Debug.Log("Tile " + activeTileIndex + " not found.");
+            return;
+        }
+
+        // Only add if there is no wall there already
+        if(tileMaster[activeTileIndex].isMonasteryWall())
+        {
+            return;
+        }
+        
+        // Find tilemaster index
+        tileMaster[activeTileIndex].monasteryInnerWall = true;
+        tileMaster[activeTileIndex].setMonasteryWall(true);
+        GameObject instance = Instantiate(wallType, new Vector3(tileMaster[activeTileIndex].x, tileMaster[activeTileIndex].y, 0), Quaternion.identity) as GameObject;
+        instance.transform.SetParent(boardHolder);
+        tileMaster[activeTileIndex].monasteryWallObject = instance;
+        tileMaster[activeTileIndex].boxCollider = instance.GetComponent<BoxCollider2D>();
+    }
+
+    void removeWall(int activeTileIndex)
+    {
+        // Make sure the index is legit, catch errors
+        try
+        {
+            int chk = tileMaster[activeTileIndex].getIndex();
+        }
+        catch
+        {
+            Debug.Log("Tile " + activeTileIndex + " not found.");
+            return;
+        }
+
+        // Only add if there is no wall there already
+        if (tileMaster[activeTileIndex].isMonasteryWall())
+        {
+            return;
+        }
+
+        // Find tilemaster index
+        tileMaster[activeTileIndex].monasteryInnerWall = false;
+        tileMaster[activeTileIndex].setMonasteryWall(false);
+        Destroy(tileMaster[activeTileIndex].monasteryWallObject);
+        tileMaster[activeTileIndex].monasteryWallObject = null;
+        tileMaster[activeTileIndex].boxCollider = null;
+
+    }
+
     bool checkDirection(int xDir, int yDir, int range, int tileIndex)
     {
         
@@ -1552,6 +1588,7 @@ public class BoardManager : MonoBehaviour {
         }
         return false;
     }
+
     public bool checkMainDirections(int x, int y, Vector3 playerPos)
     {
         int targetX = (int)playerPos.x + x;
@@ -1569,6 +1606,7 @@ public class BoardManager : MonoBehaviour {
         }
         return false;
     }
+
     public bool checkDiagonal(int x, int y, Vector3 playerPos)
     {
         int targetX = (int)playerPos.x + x;
@@ -1603,7 +1641,7 @@ public class BoardManager : MonoBehaviour {
             int randomIndex = Random.Range(1, gridPositions.Count);
             List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == gridPositions[randomIndex].y);
             int activeTileIndex = sameRow.Find(TileData => TileData.x == gridPositions[randomIndex].x).getIndex();
-            if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall())
+            if(tileMaster[activeTileIndex].isMonastery() && !tileMaster[activeTileIndex].isMonasteryWall() && tileMaster[activeTileIndex].myItem == null)
             {
                 spaceFound = true;
                 return activeTileIndex;
@@ -1637,37 +1675,18 @@ public class BoardManager : MonoBehaviour {
         }
 
         previousExitTilePosition = new Vector2(tileMaster[exitTile].x, tileMaster[exitTile].y);
-        Instantiate(exit, new Vector3(tileMaster[exitTile].x, tileMaster[exitTile].y, 0f), Quaternion.identity);
+        GameObject exitObject = Instantiate(exit, new Vector3(tileMaster[exitTile].x, tileMaster[exitTile].y, 0f), Quaternion.identity) as GameObject;
+        tileMaster[exitTile].myItem = exitObject; 
     }
 
-    void placeRelics(int relicCount)
+    void placeItem(int itemCount, GameObject itemObject)
     {
-        for (int r = 0; r < relicCount; r++)
+        for (int r = 0; r < itemCount; r++)
         {
             int targetTile = RandomTileInMonastery();
-            Instantiate(relic, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
+            GameObject objectInstance = Instantiate(itemObject, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity) as GameObject;
+            tileMaster[targetTile].myItem = objectInstance;
         }
-
-    }
-
-    void placeAcid(int acidCount)
-    {
-        for (int r = 0; r < acidCount; r++)
-        {
-            int targetTile = RandomTileInMonastery();
-            Instantiate(acidObject, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
-        }
-
-    }
-
-    void placePotash(int potashCount)
-    {
-        for (int r = 0; r < potashCount; r++)
-        {
-            int targetTile = RandomTileInMonastery();
-            Instantiate(potashObject, new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0f), Quaternion.identity);
-        }
-
     }
 
     void placeStartPlayer()
@@ -1678,24 +1697,21 @@ public class BoardManager : MonoBehaviour {
         {
             playerObject = GameObject.Find("Player");
             int targetTile = RandomTileInMonastery();
+            removeWall(targetTile);     
             playerObject.transform.Translate(- new Vector3(playerObject.transform.position.x, playerObject.transform.position.y, 0) + new Vector3(tileMaster[targetTile].x, tileMaster[targetTile].y, 0));
 
         }
         else
         {
             playerObject = GameObject.Find("Player");
-
             playerObject.transform.Translate(-new Vector3(playerObject.transform.position.x, playerObject.transform.position.y, 0) + new Vector3(previousExitTilePosition.x, previousExitTilePosition.y, 0));
             // Should make sure that wherever the player spawns won't be a wall etc
             // Find tile
             List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == previousExitTilePosition.y);
             int activeTileIndex = sameRow.Find(TileData => TileData.x == previousExitTilePosition.x).getIndex();
-            if(tileMaster[activeTileIndex].monasteryWallObject != null)
-            {
-                Destroy(tileMaster[activeTileIndex].monasteryWallObject);
-            }
-        
+            removeWall(activeTileIndex);        
         }
+
     }
 
     void placeStartYoghurts(int yoghurtCount)
@@ -1705,9 +1721,7 @@ public class BoardManager : MonoBehaviour {
             int targetTile = RandomTileInMonastery();
             tileMaster[targetTile].yoghurtLevel = yogMax;
             tileMaster[targetTile].updateYoghurt(yoghurtTypes,yoghurtHolder);
-
-        }
-        
+        }     
     }
 
     public void SetupScene(int level)
@@ -1717,29 +1731,20 @@ public class BoardManager : MonoBehaviour {
         BoardSetup();
         InitialiseList();
 
-        //LayoutObjectAtRandom(wallTiles, wallCount.minimum, wallCount.maximum);
-        //LayoutObjectAtRandom(foodTiles, foodCount.minimum, foodCount.maximum);
-
         int yoghurtCount = (int)Mathf.Log((level + 5), 2f);
+  
         placeStartYoghurts(yoghurtCount);
 
         int potashCount = Random.Range(0, 3);
-        placePotash(potashCount);
         int acidCount = Random.Range(1, 3);
-        placeAcid(acidCount);
-
-        int relicCount = (int)Mathf.Log(level, 2f); // logarithmic. 3 on level 8, etc.
-        //LayoutObjectAtRandom(enemyTiles, enemyCount, enemyCount);
-
-        relicCount = Random.Range(3,7);
-
-        // Place relics
-        placeRelics(relicCount);
-
+        //int relicCount = (int)Mathf.Log(level, 2f);       // logarithmic. 3 on level 8, etc.
+        int relicCount = Random.Range(3, 7);
+        placeItem(potashCount, potashObject);
+        placeItem(acidCount, acidObject);
+        placeItem(relicCount, relicObject);
         placeStartPlayer();
         // Put exit within bounds of monastery
         placeExit();
-
 
     }
 }
