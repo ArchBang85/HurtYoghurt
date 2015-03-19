@@ -24,13 +24,7 @@ public class BoardManager : MonoBehaviour {
     public int columns = 8;
     public int rows = 8;
 
-    // Instantiable objects
-    public GameObject playerObject;
-    public GameObject testWall;
-    public GameObject yoghurtHolder;
-    public LayerMask blockingLayer;
-    public GameObject[] yoghurtTypes = new GameObject[5];
-    public GameObject[] particleEffects = new GameObject[3]; // All particle effects used on board - should
+
     
     // Inventory counters -> this could sit in the game manager too
     public int acidCount = 3;
@@ -53,21 +47,31 @@ public class BoardManager : MonoBehaviour {
 
     public List<TileData> tileMaster = new List<TileData>();
 
-    public Count wallCount = new Count(5, 9); // minimum and maximum of walls
-    public Count foodCount = new Count(1, 3);
+    // Instantiable objects
+    public GameObject playerObject;
+    public GameObject testWall;
+    public GameObject yoghurtHolder;
     public GameObject exit;
     public GameObject relic;
+    public GameObject[] yoghurtTypes = new GameObject[5];
+    public GameObject[] particleEffects = new GameObject[3]; 
     public GameObject[] floorTiles;
     public GameObject[] outFloorTiles;
     public GameObject[] wallTiles;
     public GameObject[] foodTiles;
     public GameObject[] enemyTiles;
     public GameObject[] outerWallTiles;
-
-    private Transform boardHolder;
-    private List<Vector3> gridPositions = new List<Vector3>();
     public GameObject[] pisces;
 
+    public LayerMask blockingLayer;
+
+    // Parent for the board objects
+    private Transform boardHolder;
+
+    private List<Vector3> gridPositions = new List<Vector3>();
+
+
+    // Hacks for level generation
     int mainWallTopY;
     int mainWallBottomY;
 
@@ -79,6 +83,7 @@ public class BoardManager : MonoBehaviour {
 
     void Start()
     {
+        // Set inventory stuff
         acidText = GameObject.Find("AcidCounter");
         potashText = GameObject.Find("PotashCounter");
         relicText = GameObject.Find("RelicCounter");
@@ -99,18 +104,6 @@ public class BoardManager : MonoBehaviour {
         potashText.GetComponent<Text>().text = potashCount.ToString();
         relicText.GetComponent<Text>().text = relicCount.ToString();
 
-    }
-    [Serializable]
-    public class Count
-    {
-        public int minimum;
-        public int maximum;
-
-            public Count (int min, int max)
-            {
-                minimum = min;
-                maximum = max;
-            }
     }
 
     public void Update()
@@ -133,6 +126,8 @@ public class BoardManager : MonoBehaviour {
             if(acidCount > 0)
             {
                 areaEffect(0, 1, 600, tileMaster, "Acid");
+
+                // could have a decrementing method
                 acidCount -= 1;
                 acidText.GetComponent<Text>().text = acidCount.ToString();
                
@@ -154,24 +149,31 @@ public class BoardManager : MonoBehaviour {
 
     public class TileData
     {
-        public bool hasTile = false;
+  
         int index {get; set;}
         public int x { get; set; }
         public int y { get; set; }
-        bool beenChecked = false;
-        bool monasteryWall = false;
+
         public bool monasteryInnerWall = false; // can be blown up
+
         public BoxCollider2D boxCollider;
         public GameObject monasteryWallObject = null;
         public GameObject myFloor = null;
         public GameObject myYoghurt;
         public GameObject myItem = null;
+
         public bool isExit = false;
         public bool hasPlayer = false;
+        public bool hasTile = false;
+        bool beenChecked = false;
+        bool monasteryWall = false;
+
         public string description;
         public int floorType = 0;
         private int floorTypeMax = 4;
         private string floorTypeName = "Basic";
+
+        // Not used, should it be?
         public int terrainCost = 0;
 
         public int yoghurtLevel = 0;
@@ -536,6 +538,20 @@ public class BoardManager : MonoBehaviour {
             Debug.Log("The coordinates for that tile are: " + tM[nbTiles[7]].x + ", " + tM[nbTiles[7]].y);    
         }
 
+    }
+
+
+    [Serializable]
+    public class Count
+    {
+        public int minimum;
+        public int maximum;
+
+        public Count(int min, int max)
+        {
+            minimum = min;
+            maximum = max;
+        }
     }
 
 
