@@ -167,6 +167,7 @@ public class BoardManager : MonoBehaviour {
         public bool hasTile = false;
         bool beenChecked = false;
         bool monasteryWall = false;
+        private bool isMonasteryTile = false;
 
         public string description;
         public int floorType = 0;
@@ -183,8 +184,23 @@ public class BoardManager : MonoBehaviour {
         public int growthTimer = 0;
         public int growthTimerReset = 10;
 
+        // neighbouring tiles as integers
+        // 0 1 2 
+        // 3 c 4
+        // 5 6 7
+        public int[] nbTiles = new int[8];
+
+        // constructor
+        public TileData(int counter, int xInit, int yInit)
+        {
+            index = counter;
+            x = xInit;
+            y = yInit;
+        }
+
         public void setFloorName(string name)
         {
+            // what's a good way of handling n floornames?
             if (name == "Basic")
             {
                 floorTypeName = "Basic";
@@ -207,27 +223,25 @@ public class BoardManager : MonoBehaviour {
             }
         }
 
-
         public void updateColour()
         {
+            // only allow yoghurt growth within monastery walls
             if (this.isMonasteryTile)
             {
                 // DISCRETE STYLE
                 // combining two will create third
-                if (floorTypeName == "Explosive")
-                {
-                    floorType = 0;
-                    yoghurtLevelMax = 5;
-                    growthTimerReset = 3;
-
-                }
-
                 if (floorTypeName == "Basic")
                 {
                     floorType = 2;
                     yoghurtLevelMax = 5;
                     growthTimerReset = 6;
                     terrainCost = 0;
+                }
+                if (floorTypeName == "Explosive")
+                {
+                    floorType = 0;
+                    yoghurtLevelMax = 5;
+                    growthTimerReset = 3;
                 }
 
                 if (floorTypeName == "Acid")
@@ -249,9 +263,7 @@ public class BoardManager : MonoBehaviour {
                 }
 
 
-
-                // LOOPING STYLE
-
+                // LOOPING STYLE - redundant
                 // Allow yoghurtlevel to loop around 
                 if (floorType > floorTypeMax)
                 {
@@ -261,8 +273,6 @@ public class BoardManager : MonoBehaviour {
                 {
                     floorType = 0;
                 }
-
-
 
                 if (floorType == 0)
                 {
@@ -296,20 +306,16 @@ public class BoardManager : MonoBehaviour {
             }
         }
        
-        
-    
-       
+        // Should this be in the tile class?
         void spinObject(GameObject obj)
         {
 
             int rotateChance = Random.Range(0, 10);
             if (rotateChance < 5)
             {
-                int rotationAmount = 90;
-                if (Random.Range(0, 2) < 1)
-                {
-                    rotationAmount = 45;
-                }
+                int rotationAmount = Random.Range(0,3);
+                if (rotationAmount == 1) rotationAmount = 45;
+                if (rotationAmount == 2) rotationAmount = 90;
                 obj.transform.Rotate(-Vector3.forward, rotationAmount, Space.World);
             }
 
@@ -335,12 +341,16 @@ public class BoardManager : MonoBehaviour {
 
         public void updateYoghurt(GameObject[] yogTypes, GameObject yoghurtHolder)
         {
-            if (yoghurtLevel > yoghurtLevelMax) yoghurtLevel = yoghurtLevelMax;
-            if (yoghurtLevel < 0) yoghurtLevel = 0;
-
+            //if (yoghurtLevel > yoghurtLevelMax) yoghurtLevel = yoghurtLevelMax;
+            //if (yoghurtLevel < 0) yoghurtLevel = 0;
+            yoghurtLevel = (int)Mathf.Clamp((float)yoghurtLevel, 0f, (float)yoghurtLevelMax);
   
+            if(isExit)
+            {
+                yoghurtLevel = 0; //all the yoghurt flows down the exit
+            }
+
                 // What happens should depend on floor type
-            
                 if(yoghurtLevel == 0)
                 {
                     Destroy(myYoghurt);
@@ -356,7 +366,6 @@ public class BoardManager : MonoBehaviour {
              
                         // find out about rotation opportunities 
                         GameObject yogInstance = Instantiate(yogTypes[0], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
-              
                         myYoghurt = yogInstance;
                         myYoghurt.layer = LayerMask.NameToLayer("Default");
   
@@ -367,12 +376,12 @@ public class BoardManager : MonoBehaviour {
 
                         terrainCost = 10;
 
-                        //yogInstance.transform.SetParent(yoghurtHolder.transform);
+                        yogInstance.transform.SetParent(yoghurtHolder.transform);
 
                     }
                 } else if (yoghurtLevel == 2)
                 {
-                    // remove previous splodge
+                       // remove previous splodge
                         Destroy(myYoghurt);
                         myYoghurt = null;
                         // two splodges
@@ -387,7 +396,7 @@ public class BoardManager : MonoBehaviour {
                         {
                             spinObject(yogInstance);
                         }
-                        //yogInstance.transform.SetParent(yoghurtHolder.transform);
+                        yogInstance.transform.SetParent(yoghurtHolder.transform);
                         terrainCost = 20;
                     //}
                 } else if (yoghurtLevel == 3)
@@ -405,7 +414,7 @@ public class BoardManager : MonoBehaviour {
                     {
                         spinObject(yogInstance);
                     }
-                    //yogInstance.transform.SetParent(yoghurtHolder.transform);
+                    yogInstance.transform.SetParent(yoghurtHolder.transform);
                     terrainCost = 30;
 
                 } else if (yoghurtLevel == 4)
@@ -424,6 +433,7 @@ public class BoardManager : MonoBehaviour {
                         spinObject(yogInstance);
                     }
                     terrainCost = 40;
+
                 } else if (yoghurtLevel == 5)
                 {
                     // MAXIMUM YOGHURT
@@ -431,11 +441,8 @@ public class BoardManager : MonoBehaviour {
                     Destroy(myYoghurt);
                     myYoghurt = null;
                     // two splodges
-                  //  Debug.Log("creating maximum splodge");
+                    //  Debug.Log("creating maximum splodge");
                     // Make impassable
-               
-
-
                     GameObject yogInstance = Instantiate(yogTypes[4], new Vector3(x, y, 0), Quaternion.identity) as GameObject;
                     myYoghurt = yogInstance;
                     myYoghurt.layer = LayerMask.NameToLayer("BlockingLayer");
@@ -445,25 +452,7 @@ public class BoardManager : MonoBehaviour {
                     }
                     terrainCost = 50;
                 }
-            
-           
- 
 
-        }
-
-        // neighbouring tiles as integers
-        // 0 1 2 
-        // 3 c 4
-        // 5 6 7
-
-        public int[] nbTiles = new int[8];
-
-        // constructor
-        public TileData(int counter, int xInit, int yInit)
-        {
-            index = counter;
-            x = xInit;
-            y = yInit;
         }
 
         public int getX()
@@ -478,33 +467,26 @@ public class BoardManager : MonoBehaviour {
         {
             return index;
         }
-
-        private bool isMonasteryTile = false;
         public bool isMonastery()
         {
             return isMonasteryTile;
-        }
-        
+        }        
         public void setIsMonastery(bool t)
         {
             isMonasteryTile = t;
         }
-
         public void setChecked(bool t)
         {
             beenChecked = t;
         }
-
         public bool isChecked()
         {
             return beenChecked;
         }
-
         public void setMonasteryWall(bool t)
         {
             monasteryWall = t;
         }
-
         public bool isMonasteryWall()
         {
             return monasteryWall;
@@ -540,7 +522,6 @@ public class BoardManager : MonoBehaviour {
 
     }
 
-
     [Serializable]
     public class Count
     {
@@ -553,7 +534,6 @@ public class BoardManager : MonoBehaviour {
             maximum = max;
         }
     }
-
 
     void InitialiseList()
     {
@@ -1022,6 +1002,8 @@ public class BoardManager : MonoBehaviour {
 
        // yoghurtBehaviour();
     }
+
+    void tileConditions(int activeTileIndex) { }
 
     // Growing an individual yoghurt
     public void yoghurtGrow(int tileIndex)
@@ -1682,7 +1664,6 @@ public class BoardManager : MonoBehaviour {
     void placeExit()
     {
         // Shouldn't be too close to yoghurt
-
         int exitTile = RandomTileInMonastery();
         
         while (tileMaster[exitTile].y <  mainWallBottomY || tileMaster[exitTile].y > mainWallTopY)
@@ -1692,7 +1673,8 @@ public class BoardManager : MonoBehaviour {
 
         previousExitTilePosition = new Vector2(tileMaster[exitTile].x, tileMaster[exitTile].y);
         GameObject exitObject = Instantiate(exit, new Vector3(tileMaster[exitTile].x, tileMaster[exitTile].y, 0f), Quaternion.identity) as GameObject;
-        tileMaster[exitTile].myItem = exitObject; 
+        tileMaster[exitTile].myItem = exitObject;
+        tileMaster[exitTile].isExit = true;
     }
 
     void placeItem(int itemCount, GameObject itemObject)

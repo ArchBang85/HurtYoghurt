@@ -97,6 +97,8 @@ public class LogManager : MonoBehaviour
         if(s.Length > maxLineLength)
         {
             // need to split across multiple lines
+
+            // Split it better: catch full words
             multiLine = true;
             if (multiLine)
             {
