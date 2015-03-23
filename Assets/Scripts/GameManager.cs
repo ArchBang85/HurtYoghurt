@@ -137,16 +137,40 @@ public class GameManager : MonoBehaviour {
         }
 
         levelImage = GameObject.Find("LevelImage");
-        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        try
+        {
+            levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        
+        }
+        catch
+        {
+            levelText = null;
+        }
         readyButton = GameObject.Find("ReadyText");
         // Get a component ref to the attached script
         boardScript = GetComponent<BoardManager>();
-        piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
+
+        try
+        {
+            piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
+        
+        }
+        catch
+        {
+            piscesScript = null;
+        }
         // Clear out from last level
         enemies.Clear();
 
-        piscesScript.setupPisces();
-
+        try
+        {
+            piscesScript.setupPisces();
+        }
+        catch
+        {
+            Debug.Log("pisces script not found");
+        }
+        
         boardScript.SetupScene(level);
         //if (!GameOverFlag)
             ShowLevelImage();
@@ -198,7 +222,7 @@ public class GameManager : MonoBehaviour {
         //levelImage = GameObject.Find("LevelImage");
         //levelText = GameObject.Find("LevelText").GetComponent<Text>();
         //GameOverFlag = true;
-        levelText.text = "On story " + level + ", you were fermented and became one with yoghurt, "+ relics + " relics clutched in your arms, perishing.";
+        levelText.text = "On story " + level + ", you were fermented and became one with yoghurt, "+ relics + " relics clutched in your arms, perishing.\n\n\nCenturies pass\n\n\nr to restart";
         levelImage.SetActive(true);
         enabled = false;
         
@@ -263,22 +287,23 @@ public class GameManager : MonoBehaviour {
 
         //  if (canRestart)
        // {
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Escape))
         {
             Debug.Log("restarting");
             //canRestart = false;
-            level = 0;
+            level = 1;
             relics = 0;
             if (Application.loadedLevel == 0)
             {
               
                 Application.LoadLevel(1);
+                Destroy(this.gameObject);
 
             }
             else
             {
                
-                Application.LoadLevel(0);
+            //    Application.LoadLevel(0);
 
             }
 
@@ -292,8 +317,16 @@ public class GameManager : MonoBehaviour {
 
         if (piscesScript == null)
         {
-            piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
+            try
+            {
+                piscesScript = GameObject.Find("PiscesGenerator").GetComponent<VesicaPisces>();
 
+            }
+            catch
+            {
+                piscesScript = null;
+            }
+            
         }
         // Setup the game
         if(charSetup)
@@ -481,9 +514,15 @@ public class GameManager : MonoBehaviour {
 
     public void yoghurtTurn()
     {
-
-        boardScript.yoghurtBehaviour();
-        turnTicks += turnTickCost;
+        //try
+        //{
+            boardScript.yoghurtBehaviour();
+        //}
+        //catch
+        //{
+        //   Debug.Log("yoghurt behaviour error");
+        //}
+            turnTicks += turnTickCost;
 
         if (turnTicks > turnTickReset)
         {

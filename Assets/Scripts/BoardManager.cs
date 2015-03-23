@@ -96,14 +96,22 @@ public class BoardManager : MonoBehaviour {
 
     void RefreshObjects()
     {
-        acidText = GameObject.Find("AcidCounter");
-        potashText = GameObject.Find("PotashCounter");
-        relicText = GameObject.Find("RelicCounter");
-        playerObject = GameObject.Find("Player");
-        acidText.GetComponent<Text>().text = acidCount.ToString();
-        potashText.GetComponent<Text>().text = potashCount.ToString();
-        relicText.GetComponent<Text>().text = relicCount.ToString();
+        try
+        {
 
+
+            acidText = GameObject.Find("AcidCounter");
+            potashText = GameObject.Find("PotashCounter");
+            relicText = GameObject.Find("RelicCounter");
+            playerObject = GameObject.Find("Player");
+            acidText.GetComponent<Text>().text = acidCount.ToString();
+            potashText.GetComponent<Text>().text = potashCount.ToString();
+            relicText.GetComponent<Text>().text = relicCount.ToString();
+        }
+        catch
+        {
+            Debug.Log("Object refresh failed");
+        }
     }
 
     public void Update()
@@ -112,6 +120,7 @@ public class BoardManager : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Y))
         {
           //  Debug.Log(RandomTileInMonastery());
+
         }
 
         /*if(Input.GetKeyDown(KeyCode.G))
@@ -924,12 +933,20 @@ public class BoardManager : MonoBehaviour {
                 // Left side
                 for (int xPos = monasteryLeftmostX + 2; xPos < (monasteryLeftmostX + Random.Range(5,18)); xPos++)
                 {
+                    try
+                    { 
                     // Find tilemaster index
                     List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
                     int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
                     addWall(activeTileIndex, testWall);
+                    }
+                    catch
+                    {
+                        Debug.Log("Error creating left partition.");
+                    }
                 }
             }
+
             if(Random.Range(0,10)<6)
             {
                 // Right side
@@ -938,10 +955,16 @@ public class BoardManager : MonoBehaviour {
                     if(Random.Range(0,10) < 6)
                     {
                         // Find tilemaster index
-                        List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
-                        int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
-                        addWall(activeTileIndex, testWall);
-                        
+                        try
+                        {
+                            List<TileData> sameRow = tileMaster.FindAll(TileData => TileData.y == yPos);
+                            int activeTileIndex = sameRow.Find(TileData => TileData.x == xPos).getIndex();
+                            addWall(activeTileIndex, testWall);
+                        }
+                        catch
+                        {
+                            Debug.Log("Error creating partition");
+                        }
                     }       
 
                 }
@@ -1280,8 +1303,16 @@ public class BoardManager : MonoBehaviour {
         // Go through each tile once and calculate yoghurt behaviour
         for (int i = 0; i < tileMaster.Count; i++)
         {
+            try
+            {
                 yoghurtGrow(i);
-        }
+            } 
+            catch
+            {
+               // Debug.Log("Yoghurt growth error");
+            }
+        }   
+            
     }
 
     void areaEffect(int areaEffectType, int range, int tileIndex, List<TileData>tM,  string areaEffectImpact = "Basic")
